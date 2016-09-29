@@ -2,7 +2,7 @@
 
 namespace FactorioModManager.Lib.Contracts
 {
-    interface IModPackManager
+    public interface IModPackManager
     {
         Task GetModPacksSnapshot();
     }

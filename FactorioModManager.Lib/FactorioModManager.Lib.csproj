@@ -44,8 +44,11 @@
     <Reference Include="System.Configuration.Install" />
     <Reference Include="System.Management" />
   </ItemGroup>
-  <ItemGroup />
   <ItemGroup>
+    <Folder Include="Models\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Contracts\IJobDirector.cs" />
     <Compile Include="Contracts\IJobTracker.cs" />
     <Compile Include="Contracts\IModPackManager.cs" />
     <Compile Include="Contracts\IModPortalClient.cs" />
