@@ -4,8 +4,6 @@ namespace FactorioModManager.Lib.Models
 {
     public class ModDependencyMetadata
     {
-        private readonly string _modName;
-        
         public string ModName { get; internal set; }
         
         public Version RequiredVersionUpperBound { get; internal set; }
