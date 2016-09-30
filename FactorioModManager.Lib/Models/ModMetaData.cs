@@ -7,7 +7,7 @@ using System.Security.Cryptography.X509Certificates;
 
 namespace FactorioModManager.Lib.Models
 {
-    public class ModMetadata
+    public sealed class ModMetadata
     {
         public string Name { get; internal set; }
         public Version Version { get; internal set; }

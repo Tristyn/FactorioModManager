@@ -2,7 +2,7 @@
 
 namespace FactorioModManager.Lib.Models
 {
-    public class ModDependencyMetadata
+    public sealed class ModDependencyMetadata
     {
         public string ModName { get; internal set; }
         
