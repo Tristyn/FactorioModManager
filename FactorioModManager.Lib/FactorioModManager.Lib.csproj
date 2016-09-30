@@ -51,6 +51,7 @@
     <Compile Include="Contracts\IModPackManager.cs" />
     <Compile Include="Contracts\IModPortalClient.cs" />
     <Compile Include="Contracts\INetworkActivityRecorder.cs" />
+    <Compile Include="Models\JobResult.cs" />
     <Compile Include="Models\ModDependencyMetadata.cs" />
     <Compile Include="Models\ModMetadata.cs" />
     <Compile Include="Models\Version.cs" />
