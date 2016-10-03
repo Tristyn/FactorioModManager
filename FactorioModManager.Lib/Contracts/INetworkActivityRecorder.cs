@@ -2,7 +2,7 @@
 
 namespace FactorioModManager.Lib.Contracts
 {
-    public interface INetworkActivityRecorder
+    internal interface INetworkActivityRecorder
     {
         Task LogActivity(long bytesTransferred, bool isUpstream);
     }

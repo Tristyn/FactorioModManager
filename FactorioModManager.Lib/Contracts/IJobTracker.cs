@@ -1,6 +1,9 @@
-﻿namespace FactorioModManager.Lib.Contracts
+﻿using FactorioModManager.Lib.Models;
+
+namespace FactorioModManager.Lib.Contracts
 {
-    public interface IJobTracker
+    internal interface IJobTracker
     {
+        void TrackProgress(Job job);
     }
 }

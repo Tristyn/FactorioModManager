@@ -46,16 +46,24 @@
   </ItemGroup>
   <ItemGroup />
   <ItemGroup>
+    <Compile Include="Contracts\IGameInstallation.cs" />
     <Compile Include="Contracts\IJobDirector.cs" />
     <Compile Include="Contracts\IJobTracker.cs" />
     <Compile Include="Contracts\IModPackManager.cs" />
     <Compile Include="Contracts\IModPortalClient.cs" />
     <Compile Include="Contracts\INetworkActivityRecorder.cs" />
+    <Compile Include="FactorioLauncher.cs" />
+    <Compile Include="GameInstallation.cs" />
+    <Compile Include="GameInstallationFactory.cs" />
+    <Compile Include="JobScheduler.cs" />
+    <Compile Include="Models\Job.cs" />
+    <Compile Include="Models\JobFactory.cs" />
     <Compile Include="Models\JobResult.cs" />
     <Compile Include="Models\Mod.cs" />
     <Compile Include="Models\ModDependencyMetadata.cs" />
     <Compile Include="Models\ModMetadata.cs" />
     <Compile Include="Models\Version.cs" />
+    <Compile Include="FactorioWebClient.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

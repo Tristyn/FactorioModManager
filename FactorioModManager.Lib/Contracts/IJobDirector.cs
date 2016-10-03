@@ -1,6 +1,8 @@
-﻿namespace FactorioModManager.Lib.Contracts
+﻿using FactorioModManager.Lib.Models;
+
+namespace FactorioModManager.Lib.Contracts
 {
-    interface IJobDirector
+    internal interface IJobDirector
     {
     }
 }
