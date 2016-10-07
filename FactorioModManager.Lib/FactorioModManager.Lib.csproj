@@ -46,16 +46,21 @@
   </ItemGroup>
   <ItemGroup />
   <ItemGroup>
-    <Compile Include="Contracts\IGameInstallation.cs" />
+    <Compile Include="AsyncDirectory.cs" />
+    <Compile Include="Contracts\IInstallation.cs" />
     <Compile Include="Contracts\IJobDirector.cs" />
     <Compile Include="Contracts\IJobTracker.cs" />
     <Compile Include="Contracts\IModPackManager.cs" />
     <Compile Include="Contracts\IModPortalClient.cs" />
     <Compile Include="Contracts\INetworkActivityRecorder.cs" />
     <Compile Include="FactorioLauncher.cs" />
-    <Compile Include="GameInstallation.cs" />
-    <Compile Include="GameInstallationFactory.cs" />
+    <Compile Include="Installation.cs" />
+    <Compile Include="InstallationFactory.cs" />
     <Compile Include="JobScheduler.cs" />
+    <Compile Include="Models\CpuArchitecture.cs" />
+    <Compile Include="Models\InstallationSpec.cs" />
+    <Compile Include="Models\InstallationType.cs" />
+    <Compile Include="Models\InstallationStatus.cs" />
     <Compile Include="Models\Job.cs" />
     <Compile Include="Models\JobFactory.cs" />
     <Compile Include="Models\JobResult.cs" />

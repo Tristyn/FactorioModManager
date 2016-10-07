@@ -1,28 +1,29 @@
-﻿using System.Runtime.InteropServices;
+﻿using System.IO;
 using FactorioModManager.Lib.Contracts;
 using FactorioModManager.Lib.Models;
 
 namespace FactorioModManager.Lib
 {
-    internal class GameInstallationFactory
+    internal class InstallationFactory
     {
         private readonly FactorioLauncher.AppServices _services;
         private readonly string _storageDirectory;
         private readonly JobFactory _jobFactory;
         
-
-        public GameInstallationFactory(FactorioLauncher.AppServices services, string storageDirectory)
+        public InstallationFactory(FactorioLauncher.AppServices services, string storageDirectory)
         {
             _services = services;
             _storageDirectory = storageDirectory;
             _jobFactory = new JobFactory(_services.JobScheduler);
         }
 
-        public Job<IGameInstallation> Create()
+        public Job<IInstallation> Create(InstallationSpec spec)
         {
-            var install = new GameInstallation(_services, _storageDirectory);
+            var gamePath = Path.Combine(_storageDirectory, spec.ToString());
 
-            return _jobFactory.FromResult<IGameInstallation>(install);
+            var install = new Installation(spec, _services, gamePath);
+            
+            return _jobFactory.FromResult<IInstallation>(install);
         }
     }
 }
