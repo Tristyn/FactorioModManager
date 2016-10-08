@@ -5,7 +5,7 @@ using FactorioModManager.Lib.Models;
 
 namespace FactorioModManager.Lib.Archive
 {
-    public class FactorioArchiveReader
+    public class FactorioArchiveReader : IDisposable
     {
         private readonly IFactorioArchive _impl;
 
@@ -13,7 +13,7 @@ namespace FactorioModManager.Lib.Archive
         {
             if (readStream == null)
                 throw new ArgumentNullException("readStream");
-
+            
             switch (archivePlatform)
             {
                 case OS.Windows:
@@ -33,6 +33,11 @@ namespace FactorioModManager.Lib.Archive
         public IEnumerable<IArchiveEntry> Entries()
         {
             return _impl.Entries();
-        } 
+        }
+
+        public void Dispose()
+        {
+            _impl.Dispose();
+        }
     }
 }
