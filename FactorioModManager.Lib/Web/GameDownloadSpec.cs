@@ -1,6 +1,8 @@
 ﻿using System;
+using FactorioModManager.Lib.Models;
+using Version = FactorioModManager.Lib.Models.Version;
 
-namespace FactorioModManager.Lib.Models
+namespace FactorioModManager.Lib.Web
 {
     public class GameDownloadSpec
     {

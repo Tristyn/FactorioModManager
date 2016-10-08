@@ -3,6 +3,7 @@ using System.IO;
 using System.Threading.Tasks;
 using FactorioModManager.Lib.Contracts;
 using FactorioModManager.Lib.Models;
+using FactorioModManager.Lib.Web;
 
 namespace FactorioModManager.Lib
 {
@@ -14,8 +15,7 @@ namespace FactorioModManager.Lib
         /* The FactorioLauncher acts as a bootstrapper and mediator for the 
          * various APIs and infrastructure services of the application. 
          */
-
-
+        
         private readonly InstallationFactory _installationFactory;
 
         internal AppServices Services { get; private set; }

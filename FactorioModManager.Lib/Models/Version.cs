@@ -16,9 +16,9 @@ namespace FactorioModManager.Lib.Models
             Revision = revision;
         }
 
-        public long MajorVersion { get; internal set; }
-        public long MinorVersion { get; internal set; }
-        public long Revision { get; internal set; }
+        public long MajorVersion { get; }
+        public long MinorVersion { get; }
+        public long Revision { get; }
 
         public override string ToString()
         {

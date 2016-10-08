@@ -45,10 +45,6 @@
       <HintPath>..\packages\SevenZipExtractor.1.0.4\lib\net45\SevenZipExtractor.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="SharpCompress, Version=0.13.1.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\SharpCompress.0.13.1\lib\net45\SharpCompress.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Configuration.Install" />
     <Reference Include="System.IO.Compression" />
@@ -64,6 +60,13 @@
     </Content>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Archive\IArchiveEntry.cs" />
+    <Compile Include="Archive\SevenZipEntryToArchiveEntryAdapter.cs" />
+    <Compile Include="Archive\FactorioArchiveReader.cs" />
+    <Compile Include="Archive\FactorioDmgArchive.cs" />
+    <Compile Include="Archive\FactorioTgzArchive.cs" />
+    <Compile Include="Archive\FactorioZipArchive.cs" />
+    <Compile Include="Archive\IFactorioArchive.cs" />
     <Compile Include="AsyncDirectory.cs" />
     <Compile Include="Contracts\IInstallation.cs" />
     <Compile Include="Contracts\IJobDirector.cs" />
@@ -76,7 +79,8 @@
     <Compile Include="InstallationFactory.cs" />
     <Compile Include="JobScheduler.cs" />
     <Compile Include="Models\CpuArchitecture.cs" />
-    <Compile Include="Models\GameDownloadSpec.cs" />
+    <Compile Include="Web\GameArchiveFeedSpec.cs" />
+    <Compile Include="Web\GameDownloadSpec.cs" />
     <Compile Include="Models\InstallationSpec.cs" />
     <Compile Include="Models\InstallationType.cs" />
     <Compile Include="Models\InstallationStatus.cs" />
@@ -88,7 +92,9 @@
     <Compile Include="Models\ModMetadata.cs" />
     <Compile Include="Models\OS.cs" />
     <Compile Include="Models\Version.cs" />
-    <Compile Include="FactorioWebClient.cs" />
+    <Compile Include="Web\FactorioHomepageUriFactory.cs" />
+    <Compile Include="Web\FactorioWebClient.cs" />
+    <Compile Include="TempFileStream.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
