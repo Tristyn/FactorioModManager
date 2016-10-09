@@ -1,5 +1,6 @@
 ﻿using System;
 using FactorioModManager.Lib.Models;
+using OperatingSystem = FactorioModManager.Lib.Models.OperatingSystem;
 
 namespace FactorioModManager.Lib.Web
 {
@@ -31,7 +32,7 @@ namespace FactorioModManager.Lib.Web
         }
 
         /// <summary>
-        /// Returns an archive download link that returns a game archive for the specified OS, game version, bitness and client type.
+        /// Returns an archive download link that returns a game archive for the specified OperatingSystem, game version, bitness and client type.
         /// </summary>
         public Uri GetGameArchiveDownloadUri(GameDownloadSpec spec)
         {
@@ -47,34 +48,32 @@ namespace FactorioModManager.Lib.Web
              */
 
             string platform;
-            switch (spec.OS)
+            switch (spec.OperatingSystem)
             {
-                case OS.Windows:
+                case OperatingSystem.Windows:
                     platform = "win64-manual";
                     break;
-                case OS.Mac:
+                case OperatingSystem.Mac:
                     platform = "osx";
                     break;
-                case OS.Linux:
+                case OperatingSystem.Linux:
                     platform = "linux64";
                     break;
                 default:
                     throw new ArgumentOutOfRangeException();
             }
 
-            return new Uri(_gameArchiveDownloadsUriBase, string.Format("{0}/{1}/{2}", spec.Version, spec.Type, platform));
+            var uriTail = string.Format("{0}/{1}/{2}", spec.Version, spec.Type, platform);
+            return new Uri(_gameArchiveDownloadsUriBase, uriTail);
         }
 
-        public Uri GetGameArchiveFeedWebpagePageUri(GameArchiveFeedSpec spec)
+        public Uri GetGameArchiveFeedPageUri(bool isExperimentalFeed, bool onlyHeadlessServerFeed)
         {
-            if (spec == null)
-                throw new ArgumentNullException("spec");
-
             // https://www.factorio.com/[download | download-headless]/[experimental?]
 
             var uriTail = string.Format("{0}/{1}", 
-                spec.OnlyHeadlessServer ? "download-headless" : "download",
-                spec.AllowExperimental ? "experimental" : "");
+                onlyHeadlessServerFeed ? "download-headless" : "download",
+                isExperimentalFeed ? "experimental" : "");
 
             return new Uri(_homepageUriBase, uriTail);
         }

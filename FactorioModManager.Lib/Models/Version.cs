@@ -1,8 +1,9 @@
 ﻿using System;
+using System.Linq;
 
 namespace FactorioModManager.Lib.Models
 {
-    public sealed class Version
+    public sealed class Version : IComparable<Version>
     {
         public Version()
         {
@@ -48,6 +49,21 @@ namespace FactorioModManager.Lib.Models
                 hashCode = (hashCode*397) ^ Revision.GetHashCode();
                 return hashCode;
             }
+        }
+
+        public static Version Parse(string versionString)
+        {
+            if (versionString == null) throw new ArgumentNullException("versionString");
+
+            var ints = versionString
+                .Split(new[] {'.'}, StringSplitOptions.RemoveEmptyEntries)
+                .Select(int.Parse)
+                .ToList();
+
+            if(ints.Count != 3)
+                throw new ArgumentException("Not a valid version string.", "versionString");
+
+            return new Version(ints[0], ints[1], ints[2]);
         }
 
         public static bool operator ==(Version a, Version b)
@@ -116,6 +132,26 @@ namespace FactorioModManager.Lib.Models
                 return true;
 
             return a < b;
+        }
+
+        public int CompareTo(Version other)
+        {
+            if (MajorVersion > other.MajorVersion)
+                return 1;
+            if (MajorVersion < other.MajorVersion)
+                return -1;
+
+            if (MinorVersion > other.MinorVersion)
+                return 1;
+            if (MinorVersion < other.MinorVersion)
+                return -1;
+
+            if (Revision > other.Revision)
+                return 1;
+            if (Revision < other.Revision)
+                return -1;
+
+            return 0;
         }
     }
 }

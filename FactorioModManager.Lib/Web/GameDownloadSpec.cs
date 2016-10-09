@@ -1,5 +1,6 @@
 ﻿using System;
 using FactorioModManager.Lib.Models;
+using OperatingSystem = FactorioModManager.Lib.Models.OperatingSystem;
 using Version = FactorioModManager.Lib.Models.Version;
 
 namespace FactorioModManager.Lib.Web
@@ -13,9 +14,9 @@ namespace FactorioModManager.Lib.Web
         public InstallationType Type { get; }
 
         // ReSharper disable once InconsistentNaming
-        public OS OS { get; }
+        public OperatingSystem OperatingSystem { get; }
 
-        public GameDownloadSpec(Version version, CpuArchitecture architecture, InstallationType type, OS os)
+        public GameDownloadSpec(Version version, CpuArchitecture architecture, InstallationType type, OperatingSystem operatingSystem)
         {
             if (version == null)
                 throw new ArgumentNullException("version");
@@ -23,7 +24,7 @@ namespace FactorioModManager.Lib.Web
             Version = version;
             Architecture = architecture;
             Type = type;
-            OS = os;
+            OperatingSystem = operatingSystem;
         }
 
     }

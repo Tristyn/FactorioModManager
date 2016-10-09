@@ -41,6 +41,10 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
+    <Reference Include="CsQuery, Version=1.3.3.249, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\CsQuery.1.3.4\lib\net40\CsQuery.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="SevenZipExtractor, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\SevenZipExtractor.1.0.4\lib\net45\SevenZipExtractor.dll</HintPath>
       <Private>True</Private>
@@ -79,7 +83,7 @@
     <Compile Include="InstallationFactory.cs" />
     <Compile Include="JobScheduler.cs" />
     <Compile Include="Models\CpuArchitecture.cs" />
-    <Compile Include="Web\GameArchiveFeedSpec.cs" />
+    <Compile Include="Web\GameArchiveFeed.cs" />
     <Compile Include="Web\GameDownloadSpec.cs" />
     <Compile Include="Models\InstallationSpec.cs" />
     <Compile Include="Models\InstallationType.cs" />
@@ -90,7 +94,7 @@
     <Compile Include="Models\Mod.cs" />
     <Compile Include="Models\ModDependencyMetadata.cs" />
     <Compile Include="Models\ModMetadata.cs" />
-    <Compile Include="Models\OS.cs" />
+    <Compile Include="Models\OperatingSystem.cs" />
     <Compile Include="Models\Version.cs" />
     <Compile Include="Web\FactorioHomepageUriFactory.cs" />
     <Compile Include="Web\FactorioWebClient.cs" />

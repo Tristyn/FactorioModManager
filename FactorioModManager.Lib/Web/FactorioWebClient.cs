@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
@@ -30,7 +31,7 @@ namespace FactorioModManager.Lib.Web
     public class AuthorizedFactorioWebClient : IDisposable
     {
         private readonly HttpClient _httpClient;
-        private readonly FactorioHomepageUriFactory _homepageUriFactory 
+        private readonly FactorioHomepageUriFactory _homepageUriFactory
             = new FactorioHomepageUriFactory();
 
         public AuthorizedFactorioWebClient(string session)
@@ -45,17 +46,42 @@ namespace FactorioModManager.Lib.Web
             _httpClient = new HttpClient(httpClientHandler);
         }
 
+        public async Task<GameArchiveFeed> GetGameArchiveFeed()
+        {
+            // There is a "stable" feed and an "experimental" feed.
+            // Grab both and aggregate them.
+            
+            var feedUris = new[]
+            {
+                _homepageUriFactory.GetGameArchiveFeedPageUri(true, false),
+                _homepageUriFactory.GetGameArchiveFeedPageUri(false, false)
+            };
+            
+            var downloadTasks = feedUris.Select(_httpClient.GetStringAsync);
+            var feedHtmls = await Task.WhenAll(downloadTasks);
+
+            var feeds = feedHtmls.Select(GameArchiveFeed.FromFactorioDownloadsPageHtml);
+
+            // Aggregate the feeds and order by version number
+            var aggregateFeedEntries = feeds
+                // This SelectMany merges both feed lists into one
+                .SelectMany(feed => feed)
+                .OrderByDescending(downloadSpec => downloadSpec.Version)
+                .ToList();
+            
+            return new GameArchiveFeed(aggregateFeedEntries);
+        }
+
         public async Task<Stream> GetGameAsArchiveStream(GameDownloadSpec spec)
         {
             var uri = _homepageUriFactory.GetGameArchiveDownloadUri(spec);
-            var httpResponse = await _httpClient.GetAsync(uri);
-            return await httpResponse.Content.ReadAsStreamAsync();
+            return await _httpClient.GetStreamAsync(uri);
         }
 
         public async Task<FactorioArchiveReader> GetGameAsArchive(GameDownloadSpec spec)
         {
             var stream = await GetGameAsArchiveStream(spec);
-            return new FactorioArchiveReader(stream, spec.OS);
+            return new FactorioArchiveReader(stream, spec.OperatingSystem);
         }
 
         public void Dispose()
