@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace FactorioModManager.Lib.Archive
 {
-    interface IFactorioArchive : IDisposable
+    interface IGameArchiveReader : IDisposable
     {
         IEnumerable<IArchiveEntry> Entries();
     }

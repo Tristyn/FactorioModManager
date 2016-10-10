@@ -12,11 +12,11 @@ namespace FactorioModManager.Lib.Models
 
         public CpuArchitecture Architecture { get; }
         
-        public InstallationType Type { get; }
+        public BuildConfiguration Type { get; }
         
         public string ExecutableRelativePath => Path.Combine("bin", "factorio.exe");
 
-        public InstallationSpec(Version version, CpuArchitecture architecture, InstallationType type)
+        public InstallationSpec(Version version, CpuArchitecture architecture, BuildConfiguration type)
         {
             if (version == null)
                 throw new ArgumentNullException("version");

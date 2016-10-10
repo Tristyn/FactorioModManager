@@ -72,16 +72,16 @@ namespace FactorioModManager.Lib.Web
             return new GameArchiveFeed(aggregateFeedEntries);
         }
 
-        public async Task<Stream> GetGameAsArchiveStream(GameDownloadSpec spec)
+        public async Task<Stream> GetGameAsArchiveStream(GameArchiveSpec spec)
         {
             var uri = _homepageUriFactory.GetGameArchiveDownloadUri(spec);
             return await _httpClient.GetStreamAsync(uri);
         }
 
-        public async Task<FactorioArchiveReader> GetGameAsArchive(GameDownloadSpec spec)
+        public async Task<GameArchive> GetGameAsArchive(GameArchiveSpec spec)
         {
             var stream = await GetGameAsArchiveStream(spec);
-            return new FactorioArchiveReader(stream, spec.OperatingSystem);
+            return new GameArchive(stream, spec.OperatingSystem);
         }
 
         public void Dispose()

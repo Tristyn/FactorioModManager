@@ -10,11 +10,11 @@ using Version = FactorioModManager.Lib.Models.Version;
 
 namespace FactorioModManager.Lib.Web
 {
-    public class GameArchiveFeed : IEnumerable<GameDownloadSpec>
+    public class GameArchiveFeed : IEnumerable<GameArchiveSpec>
     {
-        private readonly IEnumerable<GameDownloadSpec> _downloads;
+        private readonly IEnumerable<GameArchiveSpec> _downloads;
 
-        public GameArchiveFeed(IEnumerable<GameDownloadSpec> downloads)
+        public GameArchiveFeed(IEnumerable<GameArchiveSpec> downloads)
         {
             _downloads = downloads;
         }
@@ -24,7 +24,7 @@ namespace FactorioModManager.Lib.Web
         /// </summary>
         public static GameArchiveFeed FromFactorioDownloadsPageHtml(string html)
         {
-            var downloads = new List<GameDownloadSpec>();
+            var downloads = new List<GameArchiveSpec>();
 
             var dom = CQ.CreateDocument(html);
 
@@ -54,12 +54,12 @@ namespace FactorioModManager.Lib.Web
 
                 var version = Version.Parse(splitHeader[0]);
 
-                InstallationType type;
+                BuildConfiguration type;
                 if (headerText.Contains("alpha"))
-                    type = InstallationType.Client;
+                    type = BuildConfiguration.Client;
                 else if (headerText.Contains("headless"))
-                    type = InstallationType.Server;
-                else type = InstallationType.Demo;
+                    type = BuildConfiguration.Server;
+                else type = BuildConfiguration.Demo;
 
                 // A <P> tag, ignore it
                 var releaseDescription = releaseHeader.NextElementSibling;
@@ -90,14 +90,14 @@ namespace FactorioModManager.Lib.Web
                         cpu = CpuArchitecture.X86;
                     else cpu = CpuArchitecture.X86_64;
 
-                    downloads.Add(new GameDownloadSpec(version, cpu, type, os));
+                    downloads.Add(new GameArchiveSpec(version, cpu, type, os));
                 }
             }
 
             return new GameArchiveFeed(downloads);
         }
 
-        public IEnumerator<GameDownloadSpec> GetEnumerator()
+        public IEnumerator<GameArchiveSpec> GetEnumerator()
         {
             return _downloads.GetEnumerator();
         }

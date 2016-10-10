@@ -66,11 +66,11 @@
   <ItemGroup>
     <Compile Include="Archive\IArchiveEntry.cs" />
     <Compile Include="Archive\SevenZipEntryToArchiveEntryAdapter.cs" />
-    <Compile Include="Archive\FactorioArchiveReader.cs" />
-    <Compile Include="Archive\FactorioDmgArchive.cs" />
-    <Compile Include="Archive\FactorioTgzArchive.cs" />
-    <Compile Include="Archive\FactorioZipArchive.cs" />
-    <Compile Include="Archive\IFactorioArchive.cs" />
+    <Compile Include="Archive\GameArchive.cs" />
+    <Compile Include="Archive\GameDmgArchiveReader.cs" />
+    <Compile Include="Archive\GameTgzArchiveReader.cs" />
+    <Compile Include="Archive\GameZipArchiveReader.cs" />
+    <Compile Include="Archive\IGameArchiveReader.cs" />
     <Compile Include="AsyncDirectory.cs" />
     <Compile Include="Contracts\IInstallation.cs" />
     <Compile Include="Contracts\IJobDirector.cs" />
@@ -84,9 +84,9 @@
     <Compile Include="JobScheduler.cs" />
     <Compile Include="Models\CpuArchitecture.cs" />
     <Compile Include="Web\GameArchiveFeed.cs" />
-    <Compile Include="Web\GameDownloadSpec.cs" />
+    <Compile Include="Web\GameArchiveSpec.cs" />
     <Compile Include="Models\InstallationSpec.cs" />
-    <Compile Include="Models\InstallationType.cs" />
+    <Compile Include="Models\BuildConfiguration.cs" />
     <Compile Include="Models\InstallationStatus.cs" />
     <Compile Include="Models\Job.cs" />
     <Compile Include="Models\JobFactory.cs" />

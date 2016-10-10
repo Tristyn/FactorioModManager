@@ -5,25 +5,25 @@ using Version = FactorioModManager.Lib.Models.Version;
 
 namespace FactorioModManager.Lib.Web
 {
-    public class GameDownloadSpec
+    public class GameArchiveSpec
     {
         public Version Version { get; }
 
         public CpuArchitecture Architecture { get; }
 
-        public InstallationType Type { get; }
+        public BuildConfiguration BuildConfiguration { get; }
 
         // ReSharper disable once InconsistentNaming
         public OperatingSystem OperatingSystem { get; }
 
-        public GameDownloadSpec(Version version, CpuArchitecture architecture, InstallationType type, OperatingSystem operatingSystem)
+        public GameArchiveSpec(Version version, CpuArchitecture architecture, BuildConfiguration buildConfiguration, OperatingSystem operatingSystem)
         {
             if (version == null)
                 throw new ArgumentNullException("version");
 
             Version = version;
             Architecture = architecture;
-            Type = type;
+            BuildConfiguration = buildConfiguration;
             OperatingSystem = operatingSystem;
         }
 

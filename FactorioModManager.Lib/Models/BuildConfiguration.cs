@@ -1,6 +1,6 @@
 ﻿namespace FactorioModManager.Lib.Models
 {
-    public enum InstallationType
+    public enum BuildConfiguration
     {
         Client,
         Server,

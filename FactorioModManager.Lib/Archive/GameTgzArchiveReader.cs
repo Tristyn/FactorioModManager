@@ -7,41 +7,34 @@ using SevenZipExtractor;
 
 namespace FactorioModManager.Lib.Archive
 {
-    class FactorioDmgArchive : IFactorioArchive
+    class GameTgzArchiveReader : IGameArchiveReader
     {
         private const string ArchiveRootDirectoryName = "factorio";
-
+        
         private readonly ArchiveFile _archive;
 
-        public FactorioDmgArchive(Stream readStream)
+        public GameTgzArchiveReader(Stream readStream)
         {
             if (readStream == null)
                 throw new ArgumentNullException("readStream");
             if (!readStream.CanRead)
                 throw new ArgumentException("The stream must be readable.", "readStream");
 
-            // Open a factorio .dmg file in 7zip gui to see the beautiful mess that is .dmg images
-            var dmgArchive = new ArchiveFile(readStream, KnownSevenZipFormat.Dmg);
+            // From the stream extract a GZip archive.
+            // From that, extract the Tar archive.
 
-            // Select the hfs volume from dmg
-            var hfsEntry = dmgArchive.Entries.Single(entry => entry.FileName.EndsWith(".hfs"));
-
-            // Dump the hfs volume into a temp file. As of Factorio
-            // version 0.13.20 it takes about 400MB unpacked
-            var hfsStream = new TempFileStream(FileAccess.ReadWrite, FileShare.None, 1024 * 1024);
-            hfsEntry.Extract(hfsStream);
-            // Seek to the beginning of the stream so that it can be read again.
-            hfsStream.Seek(0, SeekOrigin.Begin);
-
-            _archive = new ArchiveFile(hfsStream, KnownSevenZipFormat.Hfs);
+            var gzip = new ArchiveFile(readStream, KnownSevenZipFormat.GZip);
+            var tarStream = new MemoryStream();
+            gzip.Entries.First().Extract(tarStream);
+            _archive = new ArchiveFile(tarStream, KnownSevenZipFormat.Tar);
         }
 
         public IEnumerable<IArchiveEntry> Entries()
         {
             // The contents of the archive is entirely contained in a root folder called "factorio".
             // Strip this folder name from the base of all paths before yielding each entry.
-            // For example: the path factorio/.DS_Store becomes .DS_Store
-
+            // For example: the path factorio/bin/x64/factorio becomes bin/x64/factorio
+            
             foreach (var entry in _archive.Entries)
             {
                 var fileRelativePath = entry.FileName;
@@ -51,7 +44,7 @@ namespace FactorioModManager.Lib.Archive
                     .Substring(ArchiveRootDirectoryName.Length + 1);
                 // Exclude 1 extra character from the substring
                 // so that the directory seperator character is also trimmed from the string.
-
+                
                 // Exclude the root folder, as we are trying to hide it's existence.
                 // The root folder path is an empty string after the trim operation.
                 if (string.IsNullOrWhiteSpace(trimmedFileRelativePath))

@@ -1,33 +1,33 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using FactorioModManager.Lib.Models;
+using FactorioModManager.Lib.Web;
 using OperatingSystem = FactorioModManager.Lib.Models.OperatingSystem;
 
 namespace FactorioModManager.Lib.Archive
 {
-    public class FactorioArchiveReader : IDisposable
+    public class GameArchive : IDisposable
     {
-        private readonly IFactorioArchive _impl;
+        private readonly IGameArchiveReader _impl;
 
-        public FactorioArchiveReader(Stream readStream, OperatingSystem archivePlatform)
+        public GameArchive(Stream readStream, GameArchiveSpec spec)
         {
             if (readStream == null)
                 throw new ArgumentNullException("readStream");
             
-            switch (archivePlatform)
+            switch (spec.OperatingSystem)
             {
                 case OperatingSystem.Windows:
-                    _impl = new FactorioZipArchive(readStream);
+                    _impl = new GameZipArchiveReader(readStream);
                     break;
                 case OperatingSystem.Mac:
-                    _impl = new FactorioDmgArchive(readStream);
+                    _impl = new GameDmgArchiveReader(readStream);
                     break;
                 case OperatingSystem.Linux:
-                    _impl = new FactorioTgzArchive(readStream);
+                    _impl = new GameTgzArchiveReader(readStream);
                     break;
                 default:
-                    throw new ArgumentOutOfRangeException("archivePlatform");
+                    throw new ArgumentOutOfRangeException("spec");
             }
         }
 

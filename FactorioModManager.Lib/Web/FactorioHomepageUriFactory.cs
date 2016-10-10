@@ -34,7 +34,7 @@ namespace FactorioModManager.Lib.Web
         /// <summary>
         /// Returns an archive download link that returns a game archive for the specified OperatingSystem, game version, bitness and client type.
         /// </summary>
-        public Uri GetGameArchiveDownloadUri(GameDownloadSpec spec)
+        public Uri GetGameArchiveDownloadUri(GameArchiveSpec spec)
         {
             /* uri format: factorio.com/get-download/{version}/{build}/{platform}
              * 
@@ -63,7 +63,7 @@ namespace FactorioModManager.Lib.Web
                     throw new ArgumentOutOfRangeException();
             }
 
-            var uriTail = string.Format("{0}/{1}/{2}", spec.Version, spec.Type, platform);
+            var uriTail = string.Format("{0}/{1}/{2}", spec.Version, spec.BuildConfiguration, platform);
             return new Uri(_gameArchiveDownloadsUriBase, uriTail);
         }
 
