@@ -18,8 +18,6 @@ namespace FactorioModManager.Lib
         
         private readonly InstallationFactory _installationFactory;
 
-        internal AppServices Services { get; private set; }
-
         private const string InstallationsFolder = "installs";
 
         public static Task<FactorioLauncher> Create(string storageDirectory)
@@ -30,36 +28,19 @@ namespace FactorioModManager.Lib
 
         private FactorioLauncher(string storageDirectory)
         {
-            var jobScheduler = new JobScheduler();
-            var modPortalClient = new FactorioWebClient();
-
-            var services = new AppServices(jobScheduler, modPortalClient);
-
             var installationsAbsolutePath = Path.Combine(storageDirectory, InstallationsFolder);
-            _installationFactory = new InstallationFactory(services, installationsAbsolutePath);
+            _installationFactory = new InstallationFactory(installationsAbsolutePath);
         }
 
-        public Job<IInstallation> GetStandaloneInstallation(InstallationSpec spec)
+        public IInstallation GetStandaloneInstallation(InstallationSpec spec)
         {
-            return _installationFactory.Create(spec);
+            return _installationFactory.CreateStandaloneInstallation(spec);
         }
 
         public void Dispose()
         {
             // Will await all tasks in the job scheduler
             // then call Dispose() on private members.
-        }
-
-        internal class AppServices
-        {
-            public JobScheduler JobScheduler { get; private set; }
-            public FactorioWebClient FactorioWebClient { get; private set; }
-
-            public AppServices(JobScheduler jobScheduler, FactorioWebClient factorioWebClient)
-            {
-                JobScheduler = jobScheduler;
-                FactorioWebClient = factorioWebClient;
-            }
         }
     }
 }

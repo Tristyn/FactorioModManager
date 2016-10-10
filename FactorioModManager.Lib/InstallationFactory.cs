@@ -6,24 +6,18 @@ namespace FactorioModManager.Lib
 {
     internal class InstallationFactory
     {
-        private readonly FactorioLauncher.AppServices _services;
-        private readonly string _storageDirectory;
-        private readonly JobFactory _jobFactory;
+        private readonly string _standaloneInstallationsDirectory;
         
-        public InstallationFactory(FactorioLauncher.AppServices services, string storageDirectory)
+        public InstallationFactory(string standaloneInstallationsDirectory)
         {
-            _services = services;
-            _storageDirectory = storageDirectory;
-            _jobFactory = new JobFactory(_services.JobScheduler);
+            _standaloneInstallationsDirectory = standaloneInstallationsDirectory;
         }
 
-        public Job<IInstallation> Create(InstallationSpec spec)
+        public IInstallation CreateStandaloneInstallation(InstallationSpec spec)
         {
-            var gamePath = Path.Combine(_storageDirectory, spec.ToString());
+            var gamePath = Path.Combine(_standaloneInstallationsDirectory, spec.ToString());
 
-            var install = new Installation(spec, _services, gamePath);
-            
-            return _jobFactory.FromResult<IInstallation>(install);
+            return new Installation(spec, gamePath);
         }
     }
 }
