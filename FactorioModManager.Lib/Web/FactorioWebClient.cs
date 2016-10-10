@@ -81,7 +81,7 @@ namespace FactorioModManager.Lib.Web
         public async Task<GameArchive> GetGameAsArchive(GameArchiveSpec spec)
         {
             var stream = await GetGameAsArchiveStream(spec);
-            return new GameArchive(stream, spec.OperatingSystem);
+            return new GameArchive(stream, spec);
         }
 
         public void Dispose()
