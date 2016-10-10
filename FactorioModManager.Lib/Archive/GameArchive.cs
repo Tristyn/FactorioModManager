@@ -9,12 +9,18 @@ namespace FactorioModManager.Lib.Archive
     public class GameArchive : IDisposable
     {
         private readonly IGameArchiveReader _impl;
+        
+        public GameArchiveSpec Spec { get; }
 
         public GameArchive(Stream readStream, GameArchiveSpec spec)
         {
             if (readStream == null)
                 throw new ArgumentNullException("readStream");
-            
+            if (spec == null)
+                throw new ArgumentNullException("spec");
+
+            Spec = spec;
+
             switch (spec.OperatingSystem)
             {
                 case OperatingSystem.Windows:
