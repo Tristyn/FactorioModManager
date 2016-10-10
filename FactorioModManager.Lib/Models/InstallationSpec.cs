@@ -14,7 +14,23 @@ namespace FactorioModManager.Lib.Models
         
         public BuildConfiguration Type { get; }
         
-        public string ExecutableRelativePath => Path.Combine("bin", "factorio.exe");
+        public string ExecutableRelativePath
+        {
+            get
+            {
+                switch (Environment.OSVersion.Platform.ToFactorioSupportedOperatingSystem())
+                {
+                    case OperatingSystem.Windows:
+                        return Path.Combine("bin", "factorio.exe");
+                    case OperatingSystem.Mac:
+                        return Path.Combine("factorio.app", "Contents", "macOS", "factorio");
+                    case OperatingSystem.Linux:
+                        return Path.Combine("bin", "factorio");
+                    default:
+                        throw new ArgumentOutOfRangeException();
+                }
+            }
+        }
 
         public InstallationSpec(Version version, CpuArchitecture architecture, BuildConfiguration type)
         {
