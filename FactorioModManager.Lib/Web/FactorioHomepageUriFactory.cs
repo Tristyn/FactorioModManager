@@ -31,6 +31,16 @@ namespace FactorioModManager.Lib.Web
             _gameArchiveDownloadsUriBase = new Uri(_homepageUriBase, "get-download/");
         }
 
+        public Uri GetHomepage()
+        {
+            return _homepageUriBase;
+        }
+
+        public Uri GetLoginPage()
+        {
+            return new Uri(_homepageUriBase, "login");
+        }
+
         /// <summary>
         /// Returns an archive download link that returns a game archive for the specified OperatingSystem, game version, bitness and client type.
         /// </summary>

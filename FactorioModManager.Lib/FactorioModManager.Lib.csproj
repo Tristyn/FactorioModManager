@@ -92,13 +92,15 @@
     <Compile Include="Contracts\IJobDirector.cs" />
     <Compile Include="Contracts\IJobTracker.cs" />
     <Compile Include="Contracts\IModPackManager.cs" />
-    <Compile Include="Contracts\IModPortalClient.cs" />
+    <Compile Include="Web\AuthorizedFactorioWebClient.cs" />
+    <Compile Include="Web\IAnonymousFactorioWebClient.cs" />
     <Compile Include="Contracts\INetworkActivityRecorder.cs" />
     <Compile Include="FactorioLauncher.cs" />
     <Compile Include="Installation.cs" />
     <Compile Include="InstallationFactory.cs" />
     <Compile Include="JobScheduler.cs" />
     <Compile Include="Models\CpuArchitecture.cs" />
+    <Compile Include="Web\FactorioAuthToken.cs" />
     <Compile Include="Web\GameArchiveFeed.cs" />
     <Compile Include="Web\GameArchiveSpec.cs" />
     <Compile Include="Models\InstallationSpec.cs" />
@@ -113,7 +115,7 @@
     <Compile Include="Models\OperatingSystem.cs" />
     <Compile Include="Models\Version.cs" />
     <Compile Include="Web\FactorioHomepageUriFactory.cs" />
-    <Compile Include="Web\FactorioWebClient.cs" />
+    <Compile Include="Web\AnonymousFactorioWebClient.cs" />
     <Compile Include="TempFileStream.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

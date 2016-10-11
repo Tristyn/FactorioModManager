@@ -1,48 +1,31 @@
-﻿using System;
+using System;
 using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
 using FactorioModManager.Lib.Archive;
-using FactorioModManager.Lib.Contracts;
 
 namespace FactorioModManager.Lib.Web
 {
-    public class FactorioWebClient : IModPortalClient
-    {
-        public bool Authorize(string username, string password)
-        {
-            /* 
-             * url: factorio.com/login
-             * method: post
-             * request content type: application/x-www-form-urlencoded
-             * 
-             *  == form fields: ==
-             * csrf_token: string scraped from get: factorio.com/login form
-             * username_or_email: string
-             * password: string
-             * action: string = "Login"
-             */
-            throw new NotImplementedException();
-        }
-    }
-
     public class AuthorizedFactorioWebClient : IDisposable
     {
         private readonly HttpClient _httpClient;
         private readonly FactorioHomepageUriFactory _homepageUriFactory
             = new FactorioHomepageUriFactory();
 
-        public AuthorizedFactorioWebClient(string session)
+        public AuthorizedFactorioWebClient(FactorioAuthToken authToken)
         {
             // Add the session cookie, which acts as authorization for Factorio APIs
             var cookies = new CookieContainer();
-            cookies.Add(new Cookie("session", session, "/", "https://www.factorio.com/"));
+            cookies.Add(authToken.ToCookie());
 
             // set up HttpClient
-            var httpClientHandler = new HttpClientHandler();
-            httpClientHandler.CookieContainer = cookies;
+            var httpClientHandler = new HttpClientHandler
+            {
+                UseCookies = true,
+                CookieContainer = cookies
+            };
             _httpClient = new HttpClient(httpClientHandler);
         }
 
@@ -50,13 +33,13 @@ namespace FactorioModManager.Lib.Web
         {
             // There is a "stable" feed and an "experimental" feed.
             // Grab both and aggregate them.
-            
+
             var feedUris = new[]
             {
                 _homepageUriFactory.GetGameArchiveFeedPageUri(true, false),
                 _homepageUriFactory.GetGameArchiveFeedPageUri(false, false)
             };
-            
+
             var downloadTasks = feedUris.Select(_httpClient.GetStringAsync);
             var feedHtmls = await Task.WhenAll(downloadTasks);
 
@@ -68,7 +51,7 @@ namespace FactorioModManager.Lib.Web
                 .SelectMany(feed => feed)
                 .OrderByDescending(downloadSpec => downloadSpec.Version)
                 .ToList();
-            
+
             return new GameArchiveFeed(aggregateFeedEntries);
         }
 
