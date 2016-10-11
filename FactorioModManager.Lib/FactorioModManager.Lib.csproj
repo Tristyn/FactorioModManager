@@ -90,7 +90,6 @@
     <Compile Include="AsyncDirectory.cs" />
     <Compile Include="Contracts\IInstallation.cs" />
     <Compile Include="Contracts\IJobDirector.cs" />
-    <Compile Include="Contracts\IJobTracker.cs" />
     <Compile Include="Contracts\IModPackManager.cs" />
     <Compile Include="Web\AuthorizedFactorioWebClient.cs" />
     <Compile Include="Web\IAnonymousFactorioWebClient.cs" />
@@ -98,7 +97,6 @@
     <Compile Include="FactorioLauncher.cs" />
     <Compile Include="Installation.cs" />
     <Compile Include="InstallationFactory.cs" />
-    <Compile Include="JobScheduler.cs" />
     <Compile Include="Models\CpuArchitecture.cs" />
     <Compile Include="Web\FactorioAuthToken.cs" />
     <Compile Include="Web\GameArchiveFeed.cs" />
@@ -106,9 +104,6 @@
     <Compile Include="Models\InstallationSpec.cs" />
     <Compile Include="Models\BuildConfiguration.cs" />
     <Compile Include="Models\InstallationStatus.cs" />
-    <Compile Include="Models\Job.cs" />
-    <Compile Include="Models\JobFactory.cs" />
-    <Compile Include="Models\JobResult.cs" />
     <Compile Include="Models\Mod.cs" />
     <Compile Include="Models\ModDependencyMetadata.cs" />
     <Compile Include="Models\ModMetadata.cs" />

@@ -34,12 +34,12 @@ namespace FactorioModManager.Lib.Models
         }
 
 
-        public JobResult IsValid()
+        public bool IsValid()
         {
-            if(string.IsNullOrWhiteSpace(ModName))
-                return new JobResult("The mod name is required.");
+            if (string.IsNullOrWhiteSpace(ModName))
+                return false; // The mod name is required
 
-            return JobResult.Success;
+            return true;
         }
 
 

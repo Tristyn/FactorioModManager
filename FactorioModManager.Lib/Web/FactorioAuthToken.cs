@@ -6,7 +6,6 @@ namespace FactorioModManager.Lib.Web
     public class FactorioAuthToken
     {
         private readonly Cookie _sessionCookie;
-        public string Session { get; }
 
         public FactorioAuthToken(Cookie sessionCookie)
         {

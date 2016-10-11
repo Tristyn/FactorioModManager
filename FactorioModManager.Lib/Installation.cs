@@ -52,7 +52,7 @@ namespace FactorioModManager.Lib
             var archiveOs = archive.Spec.OperatingSystem;
 
             if (currentOs != archiveOs)
-                throw new ArgumentException("Platform Mismatch: The operating system is not compatible with this archives files.");
+                throw new ArgumentException("Platform Mismatch: The operating system is not compatible with the archive files.");
 
             using (await _directoryLock.LockAsync())
             {

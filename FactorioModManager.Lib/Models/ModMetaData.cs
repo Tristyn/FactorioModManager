@@ -41,7 +41,7 @@ namespace FactorioModManager.Lib.Models
             Description = description;
             Dependencies = dependencies ?? EmptyDependencySingleton;
         }
-
+        /*
         public JobResult IsValid()
         {
             var errors = new List<string>();
@@ -61,5 +61,6 @@ namespace FactorioModManager.Lib.Models
 
             return new JobResult(errors.ToArray());
         }
+        */
     }
 }
