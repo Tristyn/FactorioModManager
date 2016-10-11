@@ -11,10 +11,10 @@ namespace FactorioModManager.Lib.Web
         {
             if (sessionCookie == null)
                 throw new ArgumentNullException("sessionCookie");
-
+            
             _sessionCookie = sessionCookie;
         }
-
+        
         public Cookie ToCookie()
         {
             return _sessionCookie;

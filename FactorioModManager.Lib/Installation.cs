@@ -30,17 +30,18 @@ namespace FactorioModManager.Lib
             _storageDirectory = storageDirectory;
         }
 
-        public async Task<InstallationStatus> GetStatus()
+        public async Task<InstallationStatus> RefreshStatus()
         {
             using (await _directoryLock.LockAsync())
             {
                 var executableExists = await AsyncDirectory.Exists(ExecutableAbsolutePath);
 
                 if (!executableExists)
-                    return InstallationStatus.NonExistant;
+                    Status = InstallationStatus.NonExistant;
 
-                return InstallationStatus.Ready;
+                Status = InstallationStatus.Ready;
             }
+            return Status;
         }
 
         public async Task InstallFromArchive(GameArchive archive)
@@ -55,33 +56,13 @@ namespace FactorioModManager.Lib
                 throw new ArgumentException("Platform Mismatch: The operating system is not compatible with the archive files.");
 
             using (await _directoryLock.LockAsync())
+            using (new DisposalFunc(() => Status = InstallationStatus.Unknown))
             {
-                foreach (var entry in archive.Entries())
-                {
-                    var destinationPath = Path.Combine(_storageDirectory, entry.RelativePath);
-                    if (entry.IsFolder)
-                    {
-                        Directory.CreateDirectory(destinationPath);
-                    }
-                    else
-                    {
-                        // Assure that the directory exists, then create the file
-                        var parentDirPath = Path.GetDirectoryName(destinationPath);
-                        if (parentDirPath != null)
-                        {
-                            // If the parent dir is null, it means the file is located
-                            // in the root folder, such as D:\foo.txt
-                            Directory.CreateDirectory(parentDirPath);
-                        }
-                        using (var stream = File.Create(destinationPath))
-                        {
-                            entry.Extract(stream);
-                        }
-                    }
-                }
-            }
+                Status = InstallationStatus.Installing;
 
-            Status = await GetStatus();
+                await archive.Extract(_storageDirectory);
+            }
+            await RefreshStatus();
         }
     }
 }

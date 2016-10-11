@@ -91,6 +91,7 @@
     <Compile Include="Contracts\IInstallation.cs" />
     <Compile Include="Contracts\IJobDirector.cs" />
     <Compile Include="Contracts\IModPackManager.cs" />
+    <Compile Include="Models\DisposalFunc.cs" />
     <Compile Include="Web\AuthorizedFactorioWebClient.cs" />
     <Compile Include="Web\IAnonymousFactorioWebClient.cs" />
     <Compile Include="Contracts\INetworkActivityRecorder.cs" />
