@@ -45,6 +45,10 @@
       <HintPath>..\packages\CsQuery.1.3.4\lib\net40\CsQuery.dll</HintPath>
       <Private>True</Private>
     </Reference>
+    <Reference Include="Mono.Posix, Version=4.0.0.0, Culture=neutral, PublicKeyToken=0738eb9f132ed756, processorArchitecture=MSIL">
+      <HintPath>..\packages\Mono.Posix-4.5.4.5.0\lib\net45\Mono.Posix.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="Nito.AsyncEx.Coordination, Version=1.0.2.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\Nito.AsyncEx.Coordination.1.0.2\lib\net46\Nito.AsyncEx.Coordination.dll</HintPath>
       <Private>True</Private>
@@ -91,7 +95,8 @@
     <Compile Include="Contracts\IInstallation.cs" />
     <Compile Include="Contracts\IJobDirector.cs" />
     <Compile Include="Contracts\IModPackManager.cs" />
-    <Compile Include="Models\DisposalFunc.cs" />
+    <Compile Include="Files\ShortcutFile.cs" />
+    <Compile Include="Models\ModPackDirectory.cs" />
     <Compile Include="Web\AuthorizedFactorioWebClient.cs" />
     <Compile Include="Web\IAnonymousFactorioWebClient.cs" />
     <Compile Include="Contracts\INetworkActivityRecorder.cs" />
@@ -113,6 +118,17 @@
     <Compile Include="Web\FactorioHomepageUriFactory.cs" />
     <Compile Include="Web\AnonymousFactorioWebClient.cs" />
     <Compile Include="TempFileStream.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <COMReference Include="IWshRuntimeLibrary">
+      <Guid>{F935DC20-1CF0-11D0-ADB9-00C04FD58A0B}</Guid>
+      <VersionMajor>1</VersionMajor>
+      <VersionMinor>0</VersionMinor>
+      <Lcid>0</Lcid>
+      <WrapperTool>tlbimp</WrapperTool>
+      <Isolated>False</Isolated>
+      <EmbedInteropTypes>True</EmbedInteropTypes>
+    </COMReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

@@ -3,6 +3,7 @@ using System.IO;
 using System.Threading.Tasks;
 using FactorioModManager.Lib.Archive;
 using FactorioModManager.Lib.Contracts;
+using FactorioModManager.Lib.Files;
 using FactorioModManager.Lib.Models;
 using Nito.AsyncEx;
 
@@ -15,9 +16,8 @@ namespace FactorioModManager.Lib
         public InstallationStatus Status { get; private set; }
 
         private readonly string _storageDirectory;
+        private readonly ShortcutFile _modPackShortcutFile;
         private readonly AsyncLock _directoryLock = new AsyncLock();
-
-        public string ExecutableAbsolutePath => Path.Combine(_storageDirectory, Spec.ExecutableRelativePath);
 
         internal Installation(InstallationSpec spec, string storageDirectory)
         {
@@ -28,19 +28,27 @@ namespace FactorioModManager.Lib
 
             Spec = spec;
             _storageDirectory = storageDirectory;
+            _modPackShortcutFile = ShortcutFile.New(Path.Combine(storageDirectory, "mods"));
+
         }
 
         public async Task<InstallationStatus> RefreshStatus()
         {
             using (await _directoryLock.LockAsync())
             {
-                var executableExists = await AsyncDirectory.Exists(ExecutableAbsolutePath);
-
-                if (!executableExists)
-                    Status = InstallationStatus.NonExistant;
-
-                Status = InstallationStatus.Ready;
+                return await RefreshStatusInternal();
             }
+        }
+
+        private async Task<InstallationStatus> RefreshStatusInternal()
+        {
+            var executableExists = await AsyncDirectory.Exists(GetExecutableAbsolutePath());
+
+            if (executableExists)
+                Status = InstallationStatus.Ready;
+            else
+                Status = InstallationStatus.NonExistant;
+
             return Status;
         }
 
@@ -56,13 +64,42 @@ namespace FactorioModManager.Lib
                 throw new ArgumentException("Platform Mismatch: The operating system is not compatible with the archive files.");
 
             using (await _directoryLock.LockAsync())
-            using (new DisposalFunc(() => Status = InstallationStatus.Unknown))
             {
-                Status = InstallationStatus.Installing;
+                try
+                {
+                    Status = InstallationStatus.Installing;
 
-                await archive.Extract(_storageDirectory);
+                    await archive.Extract(_storageDirectory);
+
+                    await RefreshStatusInternal();
+                }
+                catch
+                {
+                    Status = InstallationStatus.Unknown;
+                    throw;
+                }
             }
-            await RefreshStatus();
+        }
+
+        public void SetModPack(ModPackDirectory modPackDirectory)
+        {
+            // Fuck the mods folder, we only use shortcuts and sym links
+            var modsPath = Path.Combine(_storageDirectory, "mods");
+            var modsSymLink = new FileInfo(modsPath);
+            try
+            {
+                Directory.Delete(Path.Combine(_storageDirectory, "mods"), true);
+            }
+            catch (IOException)
+            {
+                // among many possible reasons, 'mods' may be a symlink file which caused the exception
+            }
+            _modPackShortcutFile.SetTarget(modPackDirectory.Directory);
+        }
+
+        public string GetExecutableAbsolutePath()
+        {
+            return Path.Combine(_storageDirectory, Spec.ExecutableRelativePath);
         }
     }
 }
