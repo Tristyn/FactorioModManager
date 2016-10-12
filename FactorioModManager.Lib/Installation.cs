@@ -16,7 +16,9 @@ namespace FactorioModManager.Lib
         public InstallationStatus Status { get; private set; }
 
         private readonly string _storageDirectory;
-        private readonly ShortcutFile _modPackShortcutFile;
+        private readonly ShortcutFile _modPackShortcut;
+        private readonly ShortcutFile _savesShortcut;
+        private readonly ShortcutFile _configShortcut;
         private readonly AsyncLock _directoryLock = new AsyncLock();
 
         internal Installation(InstallationSpec spec, string storageDirectory)
@@ -28,7 +30,9 @@ namespace FactorioModManager.Lib
 
             Spec = spec;
             _storageDirectory = storageDirectory;
-            _modPackShortcutFile = ShortcutFile.New(Path.Combine(storageDirectory, "mods"));
+            _modPackShortcut = ShortcutFile.New(Path.Combine(storageDirectory, "mods"));
+            _savesShortcut = ShortcutFile.New(Path.Combine(storageDirectory, "saves"));
+            _configShortcut = ShortcutFile.New(Path.Combine(storageDirectory, "config"));
 
         }
 
@@ -83,7 +87,7 @@ namespace FactorioModManager.Lib
 
         public void SetModPack(ModPackDirectory modPackDirectory)
         {
-            // Fuck the mods folder, we only use shortcuts and sym links
+            // Fuck the mods directory, we only use shortcuts and sym links
             var modsPath = Path.Combine(_storageDirectory, "mods");
             var modsSymLink = new FileInfo(modsPath);
             try
@@ -94,7 +98,8 @@ namespace FactorioModManager.Lib
             {
                 // among many possible reasons, 'mods' may be a symlink file which caused the exception
             }
-            _modPackShortcutFile.SetTarget(modPackDirectory.Directory);
+
+            _modPackShortcut.SetTarget(modPackDirectory.Directory);
         }
 
         public string GetExecutableAbsolutePath()
