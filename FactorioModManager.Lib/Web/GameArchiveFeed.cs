@@ -6,7 +6,6 @@ using System.Linq;
 using CsQuery;
 using FactorioModManager.Lib.Models;
 using OperatingSystem = FactorioModManager.Lib.Models.OperatingSystem;
-using Version = FactorioModManager.Lib.Models.Version;
 
 namespace FactorioModManager.Lib.Web
 {
@@ -52,7 +51,7 @@ namespace FactorioModManager.Lib.Web
 
                 Debug.Assert(versionInts.Length == 3);
 
-                var version = Version.Parse(splitHeader[0]);
+                var version = VersionNumber.Parse(splitHeader[0]);
 
                 BuildConfiguration type;
                 if (headerText.Contains("alpha"))
@@ -88,7 +87,7 @@ namespace FactorioModManager.Lib.Web
                     CpuArchitecture cpu;
                     if (linkText.Contains("32"))
                         cpu = CpuArchitecture.X86;
-                    else cpu = CpuArchitecture.X86_64;
+                    else cpu = CpuArchitecture.X64;
 
                     downloads.Add(new GameArchiveSpec(version, cpu, type, os));
                 }

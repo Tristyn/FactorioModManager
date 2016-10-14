@@ -6,11 +6,11 @@ namespace FactorioModManager.Lib.Models
     {
         public string ModName { get; internal set; }
         
-        public Version RequiredVersionUpperBound { get; internal set; }
+        public VersionNumber RequiredVersionUpperBound { get; internal set; }
 
         public VersionComparator RequiredVersionUpperBoundComparator { get; internal set; }
 
-        public Version RequiredVersionLowerBound { get; internal set; }
+        public VersionNumber RequiredVersionLowerBound { get; internal set; }
         
         public VersionComparator RequiredVersionLowerBoundComparator { get; internal set; }
 
@@ -21,9 +21,9 @@ namespace FactorioModManager.Lib.Models
 
         public ModDependencyMetadata(
             string modName, 
-            Version requiredVersionUpperBound = null, 
+            VersionNumber requiredVersionUpperBound = null, 
             VersionComparator requiredVersionUpperBoundComparator = VersionComparator.None, 
-            Version requiredVersionLowerBound = null, VersionComparator 
+            VersionNumber requiredVersionLowerBound = null, VersionComparator 
             requiredVersionLowerBoundComparator = VersionComparator.None)
         {
             ModName = modName;

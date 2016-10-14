@@ -8,17 +8,17 @@ namespace FactorioModManager.Lib.Models
     /// </summary>
     public class InstallationSpec
     {
-        public Version Version { get; }
+        public VersionNumber Version { get; }
 
         public CpuArchitecture Architecture { get; }
-        
-        public BuildConfiguration Type { get; }
-        
+
+        public BuildConfiguration BuildConfiguration { get; }
+
         public string ExecutableRelativePath
         {
             get
             {
-                switch (Environment.OSVersion.Platform.ToFactorioSupportedOperatingSystem())
+                switch (OperatingSystemEx.CurrentOSVersion)
                 {
                     case OperatingSystem.Windows:
                         return Path.Combine("bin", "factorio.exe");
@@ -32,19 +32,44 @@ namespace FactorioModManager.Lib.Models
             }
         }
 
-        public InstallationSpec(Version version, CpuArchitecture architecture, BuildConfiguration type)
+        /// <exception cref="ArgumentNullException"><paramref name="version"/> is <see langword="null" />.</exception>
+        public InstallationSpec(VersionNumber version, CpuArchitecture architecture, BuildConfiguration buildConfiguration)
         {
             if (version == null)
                 throw new ArgumentNullException("version");
 
             Version = version;
             Architecture = architecture;
-            Type = type;
+            BuildConfiguration = buildConfiguration;
         }
 
         public override string ToString()
         {
-            return string.Format("{0}_{1}_{2}", Version, Type, Architecture);
+            return string.Format("{0}_{1}_{2}", Version, BuildConfiguration, Architecture);
+        }
+
+        /// <exception cref="ArgumentNullException"><paramref name="specString"/> is <see langword="null" />.</exception>
+        /// <exception cref="FormatException"></exception>
+        public static InstallationSpec Parse(string specString)
+        {
+            if (specString == null)
+                throw new ArgumentNullException("specString");
+
+            var parts = specString.Split('_');
+            if (parts.Length != 3)
+                throw new FormatException();
+
+            var version = VersionNumber.Parse(parts[0]);
+
+            BuildConfiguration build;
+            if (!Enum.TryParse(parts[1], out build))
+                throw new FormatException();
+
+            CpuArchitecture architecture;
+            if (!Enum.TryParse(parts[2], out architecture))
+                throw new FormatException();
+
+            return new InstallationSpec(version, architecture, build);
         }
     }
 }

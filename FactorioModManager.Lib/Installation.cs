@@ -9,7 +9,7 @@ using Nito.AsyncEx;
 
 namespace FactorioModManager.Lib
 {
-    public class Installation : IInstallation
+    public class Installation
     {
         public InstallationSpec Spec { get; }
 
@@ -21,6 +21,7 @@ namespace FactorioModManager.Lib
         private readonly ShortcutFile _configShortcut;
         private readonly AsyncLock _directoryLock = new AsyncLock();
 
+        /// <exception cref="ArgumentNullException"><paramref name="spec"/> or <paramref name="storageDirectory"/> is <see langword="null" />.</exception>
         internal Installation(InstallationSpec spec, string storageDirectory)
         {
             if (spec == null)
@@ -40,13 +41,13 @@ namespace FactorioModManager.Lib
         {
             using (await _directoryLock.LockAsync())
             {
-                return await RefreshStatusInternal();
+                return RefreshStatusInternal();
             }
         }
 
-        private async Task<InstallationStatus> RefreshStatusInternal()
+        private InstallationStatus RefreshStatusInternal()
         {
-            var executableExists = await AsyncDirectory.Exists(GetExecutableAbsolutePath());
+            var executableExists = Directory.Exists(GetExecutableAbsolutePath());
 
             if (executableExists)
                 Status = InstallationStatus.Ready;
@@ -56,26 +57,28 @@ namespace FactorioModManager.Lib
             return Status;
         }
 
+        /// <exception cref="ArgumentNullException"><paramref name="archive"/> is <see langword="null" />.</exception>
+        /// <exception cref="ArgumentException">Platform Mismatch: The operating system is not compatible with the archive files.</exception>
         public async Task InstallFromArchive(GameArchive archive)
         {
             if (archive == null)
                 throw new ArgumentNullException("archive");
-
-            var currentOs = Environment.OSVersion.Platform.ToFactorioSupportedOperatingSystem();
+            
+            var currentOs = OperatingSystemEx.CurrentOSVersion;
             var archiveOs = archive.Spec.OperatingSystem;
 
             if (currentOs != archiveOs)
-                throw new ArgumentException("Platform Mismatch: The operating system is not compatible with the archive files.");
+                throw new ArgumentException("Platform Mismatch: The operating system is not compatible with the archive files.", "archive");
 
             using (await _directoryLock.LockAsync())
             {
                 try
                 {
                     Status = InstallationStatus.Installing;
-
+                    
                     await archive.Extract(_storageDirectory);
 
-                    await RefreshStatusInternal();
+                    RefreshStatusInternal();
                 }
                 catch
                 {

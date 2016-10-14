@@ -1,13 +1,12 @@
 ﻿using System;
 using FactorioModManager.Lib.Models;
 using OperatingSystem = FactorioModManager.Lib.Models.OperatingSystem;
-using Version = FactorioModManager.Lib.Models.Version;
 
 namespace FactorioModManager.Lib.Web
 {
     public class GameArchiveSpec
     {
-        public Version Version { get; }
+        public VersionNumber Version { get; }
 
         public CpuArchitecture Architecture { get; }
 
@@ -16,7 +15,7 @@ namespace FactorioModManager.Lib.Web
         // ReSharper disable once InconsistentNaming
         public OperatingSystem OperatingSystem { get; }
 
-        public GameArchiveSpec(Version version, CpuArchitecture architecture, BuildConfiguration buildConfiguration, OperatingSystem operatingSystem)
+        public GameArchiveSpec(VersionNumber version, CpuArchitecture architecture, BuildConfiguration buildConfiguration, OperatingSystem operatingSystem)
         {
             if (version == null)
                 throw new ArgumentNullException("version");

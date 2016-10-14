@@ -10,7 +10,7 @@ namespace FactorioModManager.Lib.Models
     public sealed class ModMetadata
     {
         public string Name { get; internal set; }
-        public Version Version { get; internal set; }
+        public VersionNumber Version { get; internal set; }
         public string Title { get; internal set; }
         public string Author { get; internal set; }
         public string Contact { get; internal set; }
@@ -25,7 +25,7 @@ namespace FactorioModManager.Lib.Models
             Dependencies = EmptyDependencySingleton;
         }
 
-        public ModMetadata(string name, string title, string author, Version version,
+        public ModMetadata(string name, string title, string author, VersionNumber version,
             string contact = null, string homepage = null, string description = null,
             IReadOnlyCollection<ModDependencyMetadata> dependencies = null)
         {

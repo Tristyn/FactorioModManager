@@ -13,6 +13,9 @@ namespace FactorioModManager.Lib.Models
 
     public static class OperatingSystemEx
     {
+        public static OperatingSystem CurrentOSVersion => ToFactorioSupportedOperatingSystem(Environment.OSVersion.Platform);
+
+
         public static OperatingSystem ToFactorioSupportedOperatingSystem(this PlatformID platformId)
         {
             switch (platformId)

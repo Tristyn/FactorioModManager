@@ -3,14 +3,14 @@ using System.Linq;
 
 namespace FactorioModManager.Lib.Models
 {
-    public sealed class Version : IComparable<Version>
+    public sealed class VersionNumber : IComparable<VersionNumber>
     {
-        public Version()
+        public VersionNumber()
         {
 
         }
 
-        public Version(long major, long minor, long revision)
+        public VersionNumber(long major, long minor, long revision)
         {
             MajorVersion = major;
             MinorVersion = minor;
@@ -26,7 +26,7 @@ namespace FactorioModManager.Lib.Models
             return string.Format("{0}.{1}.{2}", MajorVersion, MinorVersion, Revision);
         }
 
-        private bool Equals(Version other)
+        private bool Equals(VersionNumber other)
         {
             return MajorVersion == other.MajorVersion
                 && MinorVersion == other.MinorVersion
@@ -37,7 +37,7 @@ namespace FactorioModManager.Lib.Models
         {
             if (ReferenceEquals(null, obj)) return false;
             if (ReferenceEquals(this, obj)) return true;
-            return obj is Version && Equals((Version) obj);
+            return obj is VersionNumber && Equals((VersionNumber) obj);
         }
 
         public override int GetHashCode()
@@ -51,9 +51,12 @@ namespace FactorioModManager.Lib.Models
             }
         }
 
-        public static Version Parse(string versionString)
+        /// <exception cref="FormatException">Not a valid version string.</exception>
+        /// <exception cref="ArgumentNullException"><paramref name="versionString"/> is <see langword="null" />.</exception>
+        public static VersionNumber Parse(string versionString)
         {
-            if (versionString == null) throw new ArgumentNullException("versionString");
+            if (versionString == null)
+                throw new ArgumentNullException("versionString");
 
             var ints = versionString
                 .Split(new[] {'.'}, StringSplitOptions.RemoveEmptyEntries)
@@ -61,12 +64,12 @@ namespace FactorioModManager.Lib.Models
                 .ToList();
 
             if(ints.Count != 3)
-                throw new ArgumentException("Not a valid version string.", "versionString");
+                throw new FormatException("Not a valid version string.");
 
-            return new Version(ints[0], ints[1], ints[2]);
+            return new VersionNumber(ints[0], ints[1], ints[2]);
         }
 
-        public static bool operator ==(Version a, Version b)
+        public static bool operator ==(VersionNumber a, VersionNumber b)
         {
             if ((object)a == null)
             {
@@ -80,7 +83,7 @@ namespace FactorioModManager.Lib.Models
                    && a.Revision == b.Revision;
         }
 
-        public static bool operator !=(Version a, Version b)
+        public static bool operator !=(VersionNumber a, VersionNumber b)
         {
             if ((object) a == null)
             {
@@ -94,7 +97,7 @@ namespace FactorioModManager.Lib.Models
                    || a.Revision != b.Revision;
         }
 
-        public static bool operator >(Version a, Version b)
+        public static bool operator >(VersionNumber a, VersionNumber b)
         {
             if (a == null) throw new ArgumentNullException("a");
             if (b == null) throw new ArgumentNullException("b");
@@ -104,7 +107,7 @@ namespace FactorioModManager.Lib.Models
                    || a.Revision > b.Revision;
         }
 
-        public static bool operator <(Version a, Version b)
+        public static bool operator <(VersionNumber a, VersionNumber b)
         {
             if (a == null) throw new ArgumentNullException("a");
             if (b == null) throw new ArgumentNullException("b");
@@ -114,7 +117,7 @@ namespace FactorioModManager.Lib.Models
                    || a.Revision < b.Revision;
         }
 
-        public static bool operator >=(Version a, Version b)
+        public static bool operator >=(VersionNumber a, VersionNumber b)
         {
             // Note: returns true when a and b are null
 
@@ -124,7 +127,7 @@ namespace FactorioModManager.Lib.Models
             return a > b;
         }
 
-        public static bool operator <=(Version a, Version b)
+        public static bool operator <=(VersionNumber a, VersionNumber b)
         {
             // Note: returns true when a and b are null
 
@@ -134,7 +137,7 @@ namespace FactorioModManager.Lib.Models
             return a < b;
         }
 
-        public int CompareTo(Version other)
+        public int CompareTo(VersionNumber other)
         {
             if (MajorVersion > other.MajorVersion)
                 return 1;

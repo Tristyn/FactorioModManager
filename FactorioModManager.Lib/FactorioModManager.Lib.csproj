@@ -92,8 +92,6 @@
     <Compile Include="Archive\GameTgzArchiveReader.cs" />
     <Compile Include="Archive\GameZipArchiveReader.cs" />
     <Compile Include="Archive\IGameArchiveReader.cs" />
-    <Compile Include="AsyncDirectory.cs" />
-    <Compile Include="Contracts\IInstallation.cs" />
     <Compile Include="Contracts\IJobDirector.cs" />
     <Compile Include="Contracts\IModPackManager.cs" />
     <Compile Include="Files\ShortcutFile.cs" />
@@ -101,7 +99,7 @@
     <Compile Include="Web\AuthorizedFactorioWebClient.cs" />
     <Compile Include="Web\IAnonymousFactorioWebClient.cs" />
     <Compile Include="Contracts\INetworkActivityRecorder.cs" />
-    <Compile Include="FactorioLauncher.cs" />
+    <Compile Include="StandaloneInstallationManager.cs" />
     <Compile Include="Installation.cs" />
     <Compile Include="InstallationFactory.cs" />
     <Compile Include="Models\CpuArchitecture.cs" />
@@ -115,7 +113,7 @@
     <Compile Include="Models\ModDependencyMetadata.cs" />
     <Compile Include="Models\ModMetadata.cs" />
     <Compile Include="Models\OperatingSystem.cs" />
-    <Compile Include="Models\Version.cs" />
+    <Compile Include="Models\VersionNumber.cs" />
     <Compile Include="Web\FactorioHomepageUriFactory.cs" />
     <Compile Include="Web\AnonymousFactorioWebClient.cs" />
     <Compile Include="TempFileStream.cs" />
