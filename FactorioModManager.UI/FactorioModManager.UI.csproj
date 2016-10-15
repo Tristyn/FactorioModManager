@@ -205,6 +205,7 @@
     </Compile>
     <Compile Include="Extensions\ObservableCollectionEx.cs" />
     <Compile Include="Framework\AsyncCommand.cs" />
+    <Compile Include="Framework\AsyncCommand`1.cs" />
     <Compile Include="Framework\AsyncCommandBase.cs" />
     <Compile Include="Framework\Command.cs" />
     <Compile Include="Framework\IAsyncCommand.cs" />

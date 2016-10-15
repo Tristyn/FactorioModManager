@@ -1,8 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.ComponentModel;
-using System.Linq;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Input;
@@ -10,16 +7,16 @@ using Nito.AsyncEx;
 
 namespace FactorioModManager.UI.Framework
 {
-    class AsyncCommand : AsyncCommandBase, INotifyPropertyChanged
+    class AsyncCommand<TResult> : AsyncCommandBase, INotifyPropertyChanged
     {
-        private readonly Func<CancellationToken, Task> _command;
+        private readonly Func<CancellationToken, Task<TResult>> _command;
         private readonly CancelAsyncCommand _cancelCommand;
         private readonly Func<bool> _canExecute;
-        private INotifyTaskCompletion _execution;
+        private INotifyTaskCompletion<TResult> _execution;
 
         public event PropertyChangedEventHandler PropertyChanged;
 
-        public INotifyTaskCompletion Execution
+        public INotifyTaskCompletion<TResult> Execution
         {
             get { return _execution; }
             set
@@ -46,7 +43,7 @@ namespace FactorioModManager.UI.Framework
         /// </summary>
         public bool ExecuteOnCapturedContext { get; set; }
 
-        public AsyncCommand(Func<CancellationToken, Task> command = null, Func<bool> canExecute = null)
+        public AsyncCommand(Func<CancellationToken, Task<TResult>> command = null, Func<bool> canExecute = null)
         {
             _command = command;
             _canExecute = canExecute;
@@ -67,11 +64,11 @@ namespace FactorioModManager.UI.Framework
         {
             _cancelCommand.NotifyCommandStarting();
             var executeTask = ExecuteOnCapturedContext
-                ? _command(_cancelCommand.Token)
+                ? _command(_cancelCommand.Token) 
                 : Task.Run(() => _command(_cancelCommand.Token));
             Execution = NotifyTaskCompletion.Create(executeTask);
             NotifyCanExecuteChanged();
-
+            
             // Don't propagate exceptions to the UI main loop.
             // Instead, return TaskCompletion and handle exceptions by data binding to Execution.
             await Execution.TaskCompleted;
