@@ -12,32 +12,51 @@
     <StackPanel Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="3" Orientation="Horizontal">
       <Button Command="{Binding ChangeWorkingFolder}" Content="Change Working Folder"/>
     </StackPanel>
-    
+
     <!-- Installs -->
     <TextBlock Grid.Row="1" Grid.Column="0">Installations</TextBlock>
-    <ItemsControl Items="{Binding Installations}"
-                  Grid.Row="2" Grid.Column="0">
-      
-    </ItemsControl>
-    <Button Command="{Binding NewInstall}" Content="New"
-            Grid.Row="3" Grid.Column="0"/>
+    <ListBox Items="{Binding Installations}" SelectedItem="{Binding SelectedInstallation}"
+             Grid.Row="2" Grid.Column="0">
 
+      <ListBox.ItemTemplate>
+        <DataTemplate>
+          <Grid>
+            <TextBlock Text="{Binding}"/>
+          </Grid>
+        </DataTemplate>
+      </ListBox.ItemTemplate>
+
+    </ListBox>
+    <Grid RowDefinitions="auto,auto,auto" ColumnDefinitions="auto,auto"
+          Grid.Row="3" Grid.Column="0">
+      <Button Command="{Binding NewInstallCommand}" Content="New" 
+              Grid.Row="0" Grid.Column="0"/>
+      <StackPanel Orientation="Horizontal"
+                  Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="1">
+        <TextBlock Text="{Binding Installation.Result}"/>
+        <TextBlock Text=", Status: "/>
+        <TextBlock Text="{Binding Installation.Result.Status}"/>
+      </StackPanel>
+      <Button Content="Install (WEB)" IsEnabled="false"/>
+      <Button Command="{Binding InstallZipCommand}" Content="Install (ZIP)"/>
+    </Grid>
+    
     <!-- Saves -->
     <TextBlock Grid.Row="1" Grid.Column="1">Saves (WIP)</TextBlock>
-    <ItemsControl Grid.Row="2" Grid.Column="1">
+    <ListBox Grid.Row="2" Grid.Column="1">
 
-    </ItemsControl>
+    </ListBox>
 
     <!-- ModPacks -->
     <TextBlock Grid.Row="1" Grid.Column="2">ModPacks (WIP)</TextBlock>
-    <ItemsControl Grid.Row="2" Grid.Column="2">
+    <ListBox Grid.Row="2" Grid.Column="2">
 
-    </ItemsControl>
+    </ListBox>
 
     <!-- Mods -->
     <TextBlock Grid.Row="1" Grid.Column="3">ModPack Mods (WIP)</TextBlock>
-    <ItemsControl Grid.Row="2" Grid.Column="3">
+    <ListBox Grid.Row="2" Grid.Column="3">
 
-    </ItemsControl>
+    </ListBox>
   </Grid>
 </Window>

@@ -1,6 +1,6 @@
 ﻿using System;
 using System.IO;
-using FactorioModManager.Lib.Contracts;
+using System.Threading.Tasks;
 using FactorioModManager.Lib.Models;
 
 namespace FactorioModManager.Lib
@@ -36,13 +36,15 @@ namespace FactorioModManager.Lib
         /// <exception cref="ArgumentException"><paramref name="path" /> is a zero-length string, contains only white space, or contains one or more invalid characters. You can query for invalid characters by using the <see cref="M:System.IO.Path.GetInvalidPathChars" /> method.-or-<paramref name="path" /> is prefixed with, or contains, only a colon character (:).</exception>
         /// <exception cref="NotSupportedException"><paramref name="path" /> contains a colon character (:) that is not part of a drive label ("C:\").</exception>
         /// <exception cref="PathTooLongException">The specified path, file name, or both exceed the system-defined maximum length. For example, on Windows-based platforms, paths must be less than 248 characters and file names must be less than 260 characters. </exception>
-        public Installation CreateStandaloneInstallation(InstallationSpec spec)
+        public async Task<Installation> CreateStandaloneInstallation(InstallationSpec spec)
         {
             var gamePath = Path.Combine(_standaloneInstallationsDirectory, spec.ToString());
 
             Directory.CreateDirectory(gamePath);
 
-            return new Installation(spec, gamePath);
+            var install = new Installation(spec, gamePath);
+            await install.RefreshStatus();
+            return install;
         }
     }
 }

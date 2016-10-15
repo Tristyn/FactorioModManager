@@ -109,5 +109,10 @@ namespace FactorioModManager.Lib
         {
             return Path.Combine(_storageDirectory, Spec.ExecutableRelativePath);
         }
+
+        public override string ToString()
+        {
+            return Spec.ToString();
+        }
     }
 }

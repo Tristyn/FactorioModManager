@@ -1,33 +1,50 @@
 ﻿using System;
 using System.Collections.ObjectModel;
 using System.IO;
+using System.Linq;
 using System.Security;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Windows.Input;
-using Avalonia.Controls;
 using FactorioModManager.Lib;
+using FactorioModManager.Lib.Archive;
 using FactorioModManager.Lib.Models;
+using FactorioModManager.Lib.Web;
 using FactorioModManager.UI.Dialogs;
 using FactorioModManager.UI.Extensions;
 using FactorioModManager.UI.Framework;
 using Nito.AsyncEx;
+using Button = Avalonia.Controls.Button;
 
 namespace FactorioModManager.UI.ViewModels
 {
     class DebugViewModel : ViewModelBase
     {
         private bool _initialized;
-        private StandaloneInstallationManager _factorio;
+        private InstallationManager _factorio;
         private readonly AsyncLock _lock = new AsyncLock();
         private INotifyTaskCompletion _changeWorkingFolderTask;
         private string _error;
         private ObservableCollection<InstallationSpec> _installations;
+        private InstallationSpec _selectedInstallation;
+        private INotifyTaskCompletion<Installation> _installation;
 
         public DebugViewModel()
         {
             InitTask = NotifyTaskCompletion.Create(Initialize);
+            ChangeWorkingFolder = new Command(ChangeWorkingFolderHandler);
+            NewInstallCommand = new Command(NewInstallHandler);
+            InstallZipCommand = new AsyncCommand<int>(async token =>
+            {
+                await InstallZipHandler();
+                return 0;
+            });
+        }
 
+        public string Error
+        {
+            get { return _error; }
+            private set { Update(ref _error, value); }
         }
 
         public async Task Initialize()
@@ -38,7 +55,10 @@ namespace FactorioModManager.UI.ViewModels
 
             var dir = Path.Combine(Environment.CurrentDirectory, "working-folder");
             SetWorkingFolder(dir);
+            SetInstallation();
         }
+
+        public INotifyTaskCompletion InitTask { get; }
 
         private void SetWorkingFolder(string path)
         {
@@ -46,8 +66,8 @@ namespace FactorioModManager.UI.ViewModels
             {
                 try
                 {
-                    _factorio = StandaloneInstallationManager.Create(Path.Combine(path, "game"));
-                    Installations = new ObservableCollection<InstallationSpec>(_factorio.GetInstallations());
+                    _factorio = InstallationManager.Create(Path.Combine(path, "game"));
+                    Installations = new ObservableCollection<InstallationSpec>(_factorio.ScanInstallationsDirectory());
 
                     // Locking Command, or SemaphoreCommand?
                     // CanExecuteChange also based on task status for these commands
@@ -60,6 +80,10 @@ namespace FactorioModManager.UI.ViewModels
                 catch (UnauthorizedAccessException)
                 {
                     Error = "Can not access the directory.";
+                }
+                catch (SecurityException)
+                {
+                    Error = "Missing the required permission to access the folder.";
                 }
                 catch (PathTooLongException)
                 {
@@ -76,7 +100,7 @@ namespace FactorioModManager.UI.ViewModels
             }
         }
 
-        public ICommand ChangeWorkingFolder => new Command(ChangeWorkingFolderHandler);
+        public ICommand ChangeWorkingFolder { get; }
 
         private void ChangeWorkingFolderHandler(object sender)
         {
@@ -91,7 +115,9 @@ namespace FactorioModManager.UI.ViewModels
             SetWorkingFolder(path);
         }
 
-        public ICommand NewInstall => new Command(NewInstallHandler);
+        #region Installs
+
+        public ICommand NewInstallCommand { get; }
 
         private void NewInstallHandler(object sender)
         {
@@ -106,7 +132,7 @@ namespace FactorioModManager.UI.ViewModels
                 {
                     _factorio.GetStandaloneInstallation(specDialog.SpecResult);
                     Installations.Clear();
-                    Installations.AddRange(_factorio.GetInstallations());
+                    Installations.AddRange(_factorio.ScanInstallationsDirectory());
                 }
                 catch (UnauthorizedAccessException)
                 {
@@ -132,13 +158,90 @@ namespace FactorioModManager.UI.ViewModels
             get { return _installations; }
             private set { Update(ref _installations, value); }
         }
-
-        public string Error
+        
+        public InstallationSpec SelectedInstallation
         {
-            get { return _error; }
-            private set { Update(ref _error, value); }
+            get { return _selectedInstallation; }
+            set
+            {
+                if (Update(ref _selectedInstallation, value))
+                    SetInstallation();
+            }
         }
 
-        public INotifyTaskCompletion InitTask { get; }
+        public INotifyTaskCompletion<Installation> Installation
+        {
+            get { return _installation; }
+            private set { Update(ref _installation, value); }
+        }
+
+        private void SetInstallation()
+        {
+            Installation = NotifyTaskCompletion.Create(async () =>
+            {
+                if (SelectedInstallation == null)
+                    return null;
+
+                return await _factorio.GetStandaloneInstallation(SelectedInstallation);
+            });
+        }
+
+        public ICommand InstallZipCommand { get; }
+
+        private async Task InstallZipHandler()
+        {
+            var selectedInstall = SelectedInstallation;
+            if (selectedInstall == null)
+                return;
+
+            var os = OperatingSystemEx.CurrentOSVersion;
+            var archiveSpec = new GameArchiveSpec(selectedInstall, os);
+            var archiveExtension = GameArchiveSpec.GetArchiveExtension(os);
+
+            var zipDialog = new OpenFileDialog
+            {
+                AutoUpgradeEnabled = true,
+                CheckFileExists = true,
+                DefaultExt = archiveExtension,
+                SupportMultiDottedExtensions = true,
+                Filter = string.Format("Archive Files (*{0}) | *{0}", archiveExtension)
+            };
+
+            if (zipDialog.ShowDialog() != DialogResult.OK)
+                return;
+
+            try
+            {
+                Installation install;
+                using (await _lock.LockAsync())
+                {
+                    install = await _factorio.GetStandaloneInstallation(selectedInstall);
+                }
+
+                using (var stream = new FileStream(zipDialog.FileNames.First(), FileMode.Open))
+                using (var archive = new GameArchive(stream, archiveSpec))
+                {
+                    await install.InstallFromArchive(archive);
+                }
+            }
+            catch (UnauthorizedAccessException)
+            {
+                Error = "Unauthorized access";
+            }
+            catch (DirectoryNotFoundException)
+            {
+                Error = "The specified path is invalid (for example, it is on an unmapped drive).";
+            }
+            catch (IOException)
+            {
+                Error = "The directory is a file.-or-The network name is not known.";
+            }
+            catch (SecurityException)
+            {
+                Error = "Security exception";
+            }
+        }
+
+        #endregion
     }
 }

@@ -99,7 +99,7 @@
     <Compile Include="Web\AuthorizedFactorioWebClient.cs" />
     <Compile Include="Web\IAnonymousFactorioWebClient.cs" />
     <Compile Include="Contracts\INetworkActivityRecorder.cs" />
-    <Compile Include="StandaloneInstallationManager.cs" />
+    <Compile Include="InstallationManager.cs" />
     <Compile Include="Installation.cs" />
     <Compile Include="InstallationFactory.cs" />
     <Compile Include="Models\CpuArchitecture.cs" />

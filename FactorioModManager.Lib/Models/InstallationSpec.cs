@@ -1,12 +1,13 @@
 ﻿using System;
 using System.IO;
+using CsQuery.EquationParser.Implementation;
 
 namespace FactorioModManager.Lib.Models
 {
     /// <summary>
     /// Describes the platform and version information of a Factorio installation.
     /// </summary>
-    public class InstallationSpec
+    public class InstallationSpec : IEquatable<InstallationSpec>
     {
         public VersionNumber Version { get; }
 
@@ -70,6 +71,56 @@ namespace FactorioModManager.Lib.Models
                 throw new FormatException();
 
             return new InstallationSpec(version, architecture, build);
+        }
+
+        public static bool operator ==(InstallationSpec a, InstallationSpec b)
+        {
+            if (ReferenceEquals(a, b)) return true;
+            if (ReferenceEquals(a, null)) return false;
+            if (ReferenceEquals(b, null)) return false;
+
+            return a.Version == b.Version
+                && a.Architecture == b.Architecture
+                && a.BuildConfiguration == b.BuildConfiguration;
+        }
+
+        public static bool operator !=(InstallationSpec a, InstallationSpec b)
+        {
+            if (ReferenceEquals(a, b)) return false;
+            if (ReferenceEquals(a, null)) return true;
+            if (ReferenceEquals(b, null)) return true;
+            
+            return a.Version != b.Version
+                && a.Architecture != b.Architecture
+                && a.BuildConfiguration != b.BuildConfiguration;
+        }
+
+        public override int GetHashCode()
+        {
+            unchecked
+            {
+                var hashCode = Version?.GetHashCode() ?? 0;
+                hashCode = (hashCode*397) ^ (int) Architecture;
+                hashCode = (hashCode*397) ^ (int) BuildConfiguration;
+                return hashCode;
+            }
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (ReferenceEquals(null, obj)) return false;
+            if (ReferenceEquals(this, obj)) return true;
+            if (obj.GetType() != GetType()) return false;
+            return Equals((InstallationSpec) obj);
+        }
+
+        public bool Equals(InstallationSpec other)
+        {
+            if (ReferenceEquals(null, other)) return false;
+            if (ReferenceEquals(this, other)) return true;
+            return Equals(Version, other.Version) 
+                && Architecture == other.Architecture 
+                && BuildConfiguration == other.BuildConfiguration;
         }
     }
 }
