@@ -2,17 +2,10 @@
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
-using System.Reactive;
-using System.Reactive.Concurrency;
-using System.Reactive.Linq;
-using System.Runtime.CompilerServices;
 using System.Security;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Windows.Input;
-using Avalonia;
-using Avalonia.Reactive;
-using Avalonia.Threading;
 using FactorioModManager.Lib;
 using FactorioModManager.Lib.Archive;
 using FactorioModManager.Lib.Models;
@@ -22,7 +15,6 @@ using FactorioModManager.UI.Extensions;
 using FactorioModManager.UI.Framework;
 using Nito.AsyncEx;
 using ReactiveUI;
-using AsyncLock = Nito.AsyncEx.AsyncLock;
 
 namespace FactorioModManager.UI.ViewModels
 {
@@ -31,7 +23,6 @@ namespace FactorioModManager.UI.ViewModels
         private bool _initialized;
         private InstallationManager _factorio;
         private readonly AsyncLock _lock = new AsyncLock();
-        private INotifyTaskCompletion _changeWorkingFolderTask;
         private string _error;
         private ObservableCollection<InstallationSpec> _installations;
         private InstallationSpec _selectedInstallation;

@@ -6,7 +6,6 @@ using FactorioModManager.Lib.Archive;
 using FactorioModManager.Lib.Files;
 using FactorioModManager.Lib.Models;
 using Nito.AsyncEx;
-using ReactiveUI;
 
 namespace FactorioModManager.Lib
 {
