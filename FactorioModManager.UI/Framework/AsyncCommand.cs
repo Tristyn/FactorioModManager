@@ -1,8 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.ComponentModel;
-using System.Linq;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Input;
@@ -40,11 +37,11 @@ namespace FactorioModManager.UI.Framework
         public bool EnabledDuringExecution { get; set; }
 
         /// <summary>
-        /// When true, runs the command on the current threading context.
-        /// In the case of WPF, it will run on the UI thread while it is not waiting on async IO.
-        /// When false, the command will run in the background on the thread pool.
+        /// When true, the command will run in the background on the thread pool.
+        /// When false, runs the command on the current threading context;
+        /// in the case of WPF, it will run on the UI thread while it is not waiting on async IO.
         /// </summary>
-        public bool ExecuteOnCapturedContext { get; set; }
+        public bool ExecuteOnThreadPool { get; set; }
 
         public AsyncCommand(Func<CancellationToken, Task> command = null, Func<bool> canExecute = null)
         {
@@ -66,9 +63,9 @@ namespace FactorioModManager.UI.Framework
         public override async Task ExecuteAsync(object parameter)
         {
             _cancelCommand.NotifyCommandStarting();
-            var executeTask = ExecuteOnCapturedContext
-                ? _command(_cancelCommand.Token)
-                : Task.Run(() => _command(_cancelCommand.Token));
+            var executeTask = ExecuteOnThreadPool
+                ? Task.Run(() => _command(_cancelCommand.Token))
+                : _command(_cancelCommand.Token);
             Execution = NotifyTaskCompletion.Create(executeTask);
             NotifyCanExecuteChanged();
 

@@ -2,10 +2,17 @@
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
+using System.Reactive;
+using System.Reactive.Concurrency;
+using System.Reactive.Linq;
+using System.Runtime.CompilerServices;
 using System.Security;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Windows.Input;
+using Avalonia;
+using Avalonia.Reactive;
+using Avalonia.Threading;
 using FactorioModManager.Lib;
 using FactorioModManager.Lib.Archive;
 using FactorioModManager.Lib.Models;
@@ -14,7 +21,8 @@ using FactorioModManager.UI.Dialogs;
 using FactorioModManager.UI.Extensions;
 using FactorioModManager.UI.Framework;
 using Nito.AsyncEx;
-using Button = Avalonia.Controls.Button;
+using ReactiveUI;
+using AsyncLock = Nito.AsyncEx.AsyncLock;
 
 namespace FactorioModManager.UI.ViewModels
 {
@@ -27,24 +35,33 @@ namespace FactorioModManager.UI.ViewModels
         private string _error;
         private ObservableCollection<InstallationSpec> _installations;
         private InstallationSpec _selectedInstallation;
-        private INotifyTaskCompletion<Installation> _installation;
+        private InstallationStatus _installationStatus;
 
         public DebugViewModel()
         {
             InitTask = NotifyTaskCompletion.Create(Initialize);
             ChangeWorkingFolder = new Command(ChangeWorkingFolderHandler);
-            NewInstallCommand = new Command(NewInstallHandler);
-            InstallZipCommand = new AsyncCommand<int>(async token =>
-            {
-                await InstallZipHandler();
-                return 0;
-            });
+            NewInstallCommand = new AsyncCommand(async token => await NewInstallHandler());
+            InstallZipCommand = new AsyncCommand(async token => await InstallZipHandler());
+            
+            var getInstallationCmd =
+                ReactiveCommand.CreateAsyncObservable(o => ReactiveCommand.CreateAsyncTask(GetInstallation));
+
+            this.WhenAnyValue(model => model.SelectedInstallation)
+                .InvokeCommand(getInstallationCmd);
+
+            getInstallationCmd.ToProperty(this, model => model.Installation, out _installation);
+            /*
+            this.WhenAnyValue(model => model.Installation)
+                .SelectMany(model => model.Status)
+                .ToProperty(this, model => model.InstallationStatus);*/
+               
         }
 
         public string Error
         {
             get { return _error; }
-            private set { Update(ref _error, value); }
+            private set { this.RaiseAndSetIfChanged(ref _error, value); }
         }
 
         public async Task Initialize()
@@ -55,7 +72,6 @@ namespace FactorioModManager.UI.ViewModels
 
             var dir = Path.Combine(Environment.CurrentDirectory, "working-folder");
             SetWorkingFolder(dir);
-            SetInstallation();
         }
 
         public INotifyTaskCompletion InitTask { get; }
@@ -119,18 +135,18 @@ namespace FactorioModManager.UI.ViewModels
 
         public ICommand NewInstallCommand { get; }
 
-        private void NewInstallHandler(object sender)
+        private async Task NewInstallHandler()
         {
             var specDialog = new InstallationSpecBuilderDialog();
+            if (specDialog.ShowDialog() != DialogResult.OK)
+                return;
+
             using (_lock.Lock())
             {
 
-                if (specDialog.ShowDialog() != DialogResult.OK)
-                    return;
-
                 try
                 {
-                    _factorio.GetStandaloneInstallation(specDialog.SpecResult);
+                    await Task.Run(() => _factorio.GetStandaloneInstallation(specDialog.SpecResult));
                     Installations.Clear();
                     Installations.AddRange(_factorio.ScanInstallationsDirectory());
                 }
@@ -156,34 +172,35 @@ namespace FactorioModManager.UI.ViewModels
         public ObservableCollection<InstallationSpec> Installations
         {
             get { return _installations; }
-            private set { Update(ref _installations, value); }
+            private set { this.RaiseAndSetIfChanged(ref _installations, value); }
         }
-        
+
         public InstallationSpec SelectedInstallation
         {
             get { return _selectedInstallation; }
-            set
-            {
-                if (Update(ref _selectedInstallation, value))
-                    SetInstallation();
-            }
+            set { this.RaiseAndSetIfChanged(ref _selectedInstallation, value); }
+        }
+        
+        private ObservableAsPropertyHelper<Installation> _installation; 
+        public Installation Installation
+        {
+            get { return _installation.Value; }
         }
 
-        public INotifyTaskCompletion<Installation> Installation
+        private async Task<Installation> GetInstallation(object o)
         {
-            get { return _installation; }
-            private set { Update(ref _installation, value); }
-        }
 
-        private void SetInstallation()
-        {
-            Installation = NotifyTaskCompletion.Create(async () =>
-            {
-                if (SelectedInstallation == null)
-                    return null;
+            if (SelectedInstallation == null)
+                return null;
 
+            using (await _lock.LockAsync())
                 return await _factorio.GetStandaloneInstallation(SelectedInstallation);
-            });
+        }
+
+        public InstallationStatus InstallationStatus
+        {
+            get { return _installationStatus; }
+            private set { this.RaiseAndSetIfChanged(ref _installationStatus, value); }
         }
 
         public ICommand InstallZipCommand { get; }
@@ -212,17 +229,20 @@ namespace FactorioModManager.UI.ViewModels
 
             try
             {
-                Installation install;
-                using (await _lock.LockAsync())
+                Installation install = null;
+                await Task.Run(async () =>
                 {
-                    install = await _factorio.GetStandaloneInstallation(selectedInstall);
-                }
+                    using (await _lock.LockAsync())
+                    {
+                        install = await _factorio.GetStandaloneInstallation(selectedInstall);
+                    }
 
-                using (var stream = new FileStream(zipDialog.FileNames.First(), FileMode.Open))
-                using (var archive = new GameArchive(stream, archiveSpec))
-                {
-                    await install.InstallFromArchive(archive);
-                }
+                    using (var stream = new FileStream(zipDialog.FileNames.First(), FileMode.Open))
+                    using (var archive = new GameArchive(stream, archiveSpec))
+                    {
+                        await install.InstallFromArchive(archive);
+                    }
+                });
             }
             catch (UnauthorizedAccessException)
             {
@@ -240,6 +260,7 @@ namespace FactorioModManager.UI.ViewModels
             {
                 Error = "Security exception";
             }
+
         }
 
         #endregion

@@ -8,9 +8,11 @@
   <Window.DataContext>
     <vm:DebugViewModel/>
   </Window.DataContext>
-  <Grid RowDefinitions="auto,auto,1*,auto" ColumnDefinitions="1*,1*,1*,1*">
+  <Grid x:Name="Blah" RowDefinitions="auto,auto,1*,auto" ColumnDefinitions="1*,1*,1*,1*">
     <StackPanel Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="3" Orientation="Horizontal">
       <Button Command="{Binding ChangeWorkingFolder}" Content="Change Working Folder"/>
+      <TextBlock Text="Error: "/>
+      <TextBlock Text="{Binding Error}"/>
     </StackPanel>
 
     <!-- Installs -->
@@ -35,10 +37,12 @@
                   Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="1">
         <TextBlock Text="{Binding Installation.Result}"/>
         <TextBlock Text=", Status: "/>
-        <TextBlock Text="{Binding Installation.Result.Status}"/>
+        <TextBlock Text="{Binding InstallationStatus}"/>
       </StackPanel>
-      <Button Content="Install (WEB)" IsEnabled="false"/>
-      <Button Command="{Binding InstallZipCommand}" Content="Install (ZIP)"/>
+      <Button Content="Install (WEB)" IsEnabled="false"
+              Grid.Row="2" Grid.Column="0"/>
+      <Button Command="{Binding InstallZipCommand}" Content="Install (ZIP)"
+              Grid.Row="2" Grid.Column="1"/>
     </Grid>
     
     <!-- Saves -->

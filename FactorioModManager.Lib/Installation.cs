@@ -1,11 +1,12 @@
 ﻿using System;
 using System.IO;
+using System.Reactive.Subjects;
 using System.Threading.Tasks;
 using FactorioModManager.Lib.Archive;
-using FactorioModManager.Lib.Contracts;
 using FactorioModManager.Lib.Files;
 using FactorioModManager.Lib.Models;
 using Nito.AsyncEx;
+using ReactiveUI;
 
 namespace FactorioModManager.Lib
 {
@@ -13,13 +14,17 @@ namespace FactorioModManager.Lib
     {
         public InstallationSpec Spec { get; }
 
-        public InstallationStatus Status { get; private set; }
-
+        public IObservable<InstallationStatus> Status
+        {
+            get { return _status; }
+        }
+        
         private readonly string _storageDirectory;
         private readonly ShortcutFile _modPackShortcut;
         private readonly ShortcutFile _savesShortcut;
         private readonly ShortcutFile _configShortcut;
         private readonly AsyncLock _directoryLock = new AsyncLock();
+        private readonly BehaviorSubject<InstallationStatus> _status= new BehaviorSubject<InstallationStatus>(InstallationStatus.Unknown);
 
         /// <exception cref="ArgumentNullException"><paramref name="spec"/> or <paramref name="storageDirectory"/> is <see langword="null" />.</exception>
         internal Installation(InstallationSpec spec, string storageDirectory)
@@ -28,13 +33,12 @@ namespace FactorioModManager.Lib
                 throw new ArgumentNullException("spec");
             if (storageDirectory == null)
                 throw new ArgumentNullException("storageDirectory");
-
+            
             Spec = spec;
             _storageDirectory = storageDirectory;
             _modPackShortcut = ShortcutFile.New(Path.Combine(storageDirectory, "mods"));
             _savesShortcut = ShortcutFile.New(Path.Combine(storageDirectory, "saves"));
             _configShortcut = ShortcutFile.New(Path.Combine(storageDirectory, "config"));
-
         }
 
         public async Task<InstallationStatus> RefreshStatus()
@@ -49,12 +53,12 @@ namespace FactorioModManager.Lib
         {
             var executableExists = Directory.Exists(GetExecutableAbsolutePath());
 
-            if (executableExists)
-                Status = InstallationStatus.Ready;
-            else
-                Status = InstallationStatus.NonExistant;
+            var nextStatus = executableExists 
+                ? InstallationStatus.Ready 
+                : InstallationStatus.NonExistant;
 
-            return Status;
+            _status.OnNext(nextStatus);
+            return nextStatus;
         }
 
         /// <exception cref="ArgumentNullException"><paramref name="archive"/> is <see langword="null" />.</exception>
@@ -63,7 +67,7 @@ namespace FactorioModManager.Lib
         {
             if (archive == null)
                 throw new ArgumentNullException("archive");
-            
+
             var currentOs = OperatingSystemEx.CurrentOSVersion;
             var archiveOs = archive.Spec.OperatingSystem;
 
@@ -74,15 +78,15 @@ namespace FactorioModManager.Lib
             {
                 try
                 {
-                    Status = InstallationStatus.Installing;
-                    
+                    _status.OnNext(InstallationStatus.Installing);
+
                     await archive.Extract(_storageDirectory);
 
                     RefreshStatusInternal();
                 }
                 catch
                 {
-                    Status = InstallationStatus.Unknown;
+                    _status.OnNext(InstallationStatus.Unknown);
                     throw;
                 }
             }
