@@ -19,7 +19,7 @@ namespace FactorioModManager.Lib.Models
         {
             get
             {
-                switch (OperatingSystemEx.CurrentOSVersion)
+                switch (OperatingSystemEx.CurrentOS)
                 {
                     case OperatingSystem.Windows:
                         return Path.Combine("bin", "factorio.exe");

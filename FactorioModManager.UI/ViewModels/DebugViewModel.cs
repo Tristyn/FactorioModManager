@@ -1,8 +1,8 @@
 ﻿using System;
-using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using System.Security;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Windows.Input;
@@ -11,22 +11,22 @@ using FactorioModManager.Lib.Archive;
 using FactorioModManager.Lib.Models;
 using FactorioModManager.Lib.Web;
 using FactorioModManager.UI.Dialogs;
-using FactorioModManager.UI.Extensions;
 using FactorioModManager.UI.Framework;
 using Nito.AsyncEx;
 using ReactiveUI;
+using ReactiveUI.Winforms;
 
 namespace FactorioModManager.UI.ViewModels
 {
-    class DebugViewModel : ViewModelBase
+    public class DebugViewModel : ViewModelBase
     {
         private bool _initialized;
-        private InstallationManager _factorio;
+        private InstallationRepository _factorio;
         private readonly AsyncLock _lock = new AsyncLock();
         private string _error;
-        private ObservableCollection<InstallationSpec> _installations;
-        private InstallationSpec _selectedInstallation;
-        private InstallationStatus _installationStatus;
+        private ReactiveBindingList<InstallationSpec> _installations;
+        private InstallationSpec _selectedInstallationSpec;
+        private InstallationViewModel _installation;
 
         public DebugViewModel()
         {
@@ -35,18 +35,10 @@ namespace FactorioModManager.UI.ViewModels
             NewInstallCommand = new AsyncCommand(async token => await NewInstallHandler());
             InstallZipCommand = new AsyncCommand(async token => await InstallZipHandler());
             
-            var getInstallationCmd =
-                ReactiveCommand.CreateAsyncObservable(o => ReactiveCommand.CreateAsyncTask(GetInstallation));
+            this.WhenAnyValue(model => model.SelectedInstallationSpec)
+                .InvokeCommand(ReactiveCommand.CreateAsyncTask(
+                o => LoadInstallation(SelectedInstallationSpec)));
 
-            this.WhenAnyValue(model => model.SelectedInstallation)
-                .InvokeCommand(getInstallationCmd);
-
-            getInstallationCmd.ToProperty(this, model => model.Installation, out _installation);
-            /*
-            this.WhenAnyValue(model => model.Installation)
-                .SelectMany(model => model.Status)
-                .ToProperty(this, model => model.InstallationStatus);*/
-               
         }
 
         public string Error
@@ -73,8 +65,8 @@ namespace FactorioModManager.UI.ViewModels
             {
                 try
                 {
-                    _factorio = InstallationManager.Create(Path.Combine(path, "game"));
-                    Installations = new ObservableCollection<InstallationSpec>(_factorio.ScanInstallationsDirectory());
+                    _factorio = InstallationRepository.Create(Path.Combine(path, "game"));
+                    Installations = new ReactiveBindingList<InstallationSpec>(_factorio.ScanInstallationsDirectory());
 
                     // Locking Command, or SemaphoreCommand?
                     // CanExecuteChange also based on task status for these commands
@@ -160,49 +152,46 @@ namespace FactorioModManager.UI.ViewModels
             }
         }
 
-        public ObservableCollection<InstallationSpec> Installations
+        public ReactiveBindingList<InstallationSpec> Installations
         {
             get { return _installations; }
             private set { this.RaiseAndSetIfChanged(ref _installations, value); }
         }
 
-        public InstallationSpec SelectedInstallation
+        public InstallationSpec SelectedInstallationSpec
         {
-            get { return _selectedInstallation; }
-            set { this.RaiseAndSetIfChanged(ref _selectedInstallation, value); }
+            get { return _selectedInstallationSpec; }
+            set { this.RaiseAndSetIfChanged(ref _selectedInstallationSpec, value); }
         }
         
-        private ObservableAsPropertyHelper<Installation> _installation; 
-        public Installation Installation
+        public InstallationViewModel Installation
         {
-            get { return _installation.Value; }
+            get { return _installation; }
+            private set { this.RaiseAndSetIfChanged(ref _installation, value); }
         }
 
-        private async Task<Installation> GetInstallation(object o)
+        private async Task LoadInstallation(InstallationSpec spec)
         {
+            if (spec == null)
+                return;
 
-            if (SelectedInstallation == null)
-                return null;
-
+            Installation model;
             using (await _lock.LockAsync())
-                return await _factorio.GetStandaloneInstallation(SelectedInstallation);
-        }
+                model = await _factorio.GetStandaloneInstallation(spec);
 
-        public InstallationStatus InstallationStatus
-        {
-            get { return _installationStatus; }
-            private set { this.RaiseAndSetIfChanged(ref _installationStatus, value); }
+            
+            Installation = new InstallationViewModel(model);
         }
 
         public ICommand InstallZipCommand { get; }
 
         private async Task InstallZipHandler()
         {
-            var selectedInstall = SelectedInstallation;
+            var selectedInstall = SelectedInstallationSpec;
             if (selectedInstall == null)
                 return;
 
-            var os = OperatingSystemEx.CurrentOSVersion;
+            var os = OperatingSystemEx.CurrentOS;
             var archiveSpec = new GameArchiveSpec(selectedInstall, os);
             var archiveExtension = GameArchiveSpec.GetArchiveExtension(os);
 
@@ -227,9 +216,8 @@ namespace FactorioModManager.UI.ViewModels
                     {
                         install = await _factorio.GetStandaloneInstallation(selectedInstall);
                     }
-
-                    using (var stream = new FileStream(zipDialog.FileNames.First(), FileMode.Open))
-                    using (var archive = new GameArchive(stream, archiveSpec))
+                    
+                    using (var archive = new GameArchive(zipDialog.FileName, archiveSpec))
                     {
                         await install.InstallFromArchive(archive);
                     }

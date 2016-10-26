@@ -38,6 +38,11 @@ namespace FactorioModManager.Lib.Web
             OperatingSystem = os;
         }
 
+        public string GetFileExtension()
+        {
+            return GetArchiveExtension(OperatingSystem);
+        }
+
         /// <exception cref="ArgumentOutOfRangeException">os</exception>
         public static string GetArchiveExtension(OperatingSystem os)
         {

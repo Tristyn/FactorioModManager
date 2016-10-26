@@ -67,7 +67,7 @@ namespace FactorioModManager.Lib
             if (archive == null)
                 throw new ArgumentNullException("archive");
 
-            var currentOs = OperatingSystemEx.CurrentOSVersion;
+            var currentOs = OperatingSystemEx.CurrentOS;
             var archiveOs = archive.Spec.OperatingSystem;
 
             if (currentOs != archiveOs)
@@ -78,7 +78,7 @@ namespace FactorioModManager.Lib
                 try
                 {
                     _status.OnNext(InstallationStatus.Installing);
-
+                    
                     await archive.Extract(_storageDirectory);
 
                     RefreshStatusInternal();

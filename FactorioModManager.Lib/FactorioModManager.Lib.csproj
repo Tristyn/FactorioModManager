@@ -37,7 +37,16 @@
     <StartupObject />
   </PropertyGroup>
   <ItemGroup>
+    <Content Include="7z">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="7z.so">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <None Include="App.config" />
+    <Content Include="Codecs\Rar.so">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
@@ -100,23 +109,38 @@
     <Content Include="7z-x86.dll">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <Content Include="7z.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="7z.exe">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Archive\ArchiveException.cs" />
+    <Compile Include="Archive\InvalidGameArchiveContentsException.cs" />
+    <Compile Include="Archive\SevenZipExitCode.cs" />
+    <Compile Include="Archive\SevenZipExitCodeException.cs" />
     <Compile Include="Archive\IArchiveEntry.cs" />
+    <Compile Include="Archive\InvalidArchiveExtensionException.cs" />
+    <Compile Include="Archive\SevenZip.cs" />
     <Compile Include="Archive\SevenZipEntryToArchiveEntryAdapter.cs" />
     <Compile Include="Archive\GameArchive.cs" />
     <Compile Include="Archive\GameDmgArchiveReader.cs" />
     <Compile Include="Archive\GameTgzArchiveReader.cs" />
     <Compile Include="Archive\GameZipArchiveReader.cs" />
     <Compile Include="Archive\IGameArchiveReader.cs" />
+    <Compile Include="Archive\FailedToLaunchSevenZipException.cs" />
     <Compile Include="Contracts\IJobDirector.cs" />
     <Compile Include="Contracts\IModPackManager.cs" />
+    <Compile Include="Files\IllegalPathCharactersException.cs" />
+    <Compile Include="Files\FileUtils.cs" />
     <Compile Include="Files\ShortcutFile.cs" />
     <Compile Include="Models\ModPackDirectory.cs" />
     <Compile Include="Web\AuthorizedFactorioWebClient.cs" />
     <Compile Include="Web\IAnonymousFactorioWebClient.cs" />
     <Compile Include="Contracts\INetworkActivityRecorder.cs" />
-    <Compile Include="InstallationManager.cs" />
+    <Compile Include="InstallationRepository.cs" />
     <Compile Include="Installation.cs" />
     <Compile Include="InstallationFactory.cs" />
     <Compile Include="Models\CpuArchitecture.cs" />
