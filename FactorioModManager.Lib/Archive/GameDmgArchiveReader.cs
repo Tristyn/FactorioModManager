@@ -1,69 +1,65 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using SevenZipExtractor;
+using System.Security;
+using System.Threading.Tasks;
+using FactorioModManager.Lib.Files;
 
 namespace FactorioModManager.Lib.Archive
 {
     class GameDmgArchiveReader : IGameArchiveReader
     {
-        private const string ArchiveRootDirectoryName = "factorio";
-
-        private readonly ArchiveFile _archive;
-
-        public GameDmgArchiveReader(Stream readStream)
+        /// <exception cref="ArgumentNullException"><paramref name="archiveFile"/> or <paramref name="outputDir"/> is <see langword="null" />.</exception>
+        /// <exception cref="FailedToLaunchSevenZipException">The 7Zip executable could not be found or failed to launch.</exception>
+        /// <exception cref="SevenZipExitCodeException">Seven zip returned with a bad exit code.</exception>
+        /// <exception cref="UnauthorizedAccessException">The caller does not have the required permission.</exception>
+        /// <exception cref="InvalidGameArchiveContentsException"></exception>
+        /// <exception cref="ArchiveException"></exception>
+        public async Task ExtractToDir(string archiveFile, string outputDir)
         {
-            if (readStream == null)
-                throw new ArgumentNullException("readStream");
-            if (!readStream.CanRead)
-                throw new ArgumentException("The stream must be readable.", "readStream");
+            if (archiveFile == null)
+                throw new ArgumentNullException("archiveFile");
+            if (outputDir == null)
+                throw new ArgumentNullException("outputDir");
 
-            // Open a factorio .dmg file in 7zip gui to see the beautiful mess that is .dmg images
-            var dmgArchive = new ArchiveFile(readStream, KnownSevenZipFormat.Dmg);
+            // The contents of the archive is entirely contained in a root folder called "Factorio_{VersionNumber x.x.x}".
+            // Extract to a temp dir, then recursively copy to the output dir. Strip this folder name from the path during the copy.
+            // For example: the path Factorio_0.13.20/bin/x64/factorio.exe becomes bin/x64/factorio.exe
 
-            // Select the hfs volume from dmg
-            var hfsEntry = dmgArchive.Entries.Single(entry => entry.FileName.EndsWith(".hfs"));
-
-            // Dump the hfs volume into a temp file. As of Factorio
-            // version 0.13.20 it takes about 400MB unpacked
-            var hfsStream = new TempFileStream(FileAccess.ReadWrite, FileShare.None, 1024 * 1024);
-            hfsEntry.Extract(hfsStream);
-            // Seek to the beginning of the stream so that it can be read again.
-            hfsStream.Seek(0, SeekOrigin.Begin);
-
-            _archive = new ArchiveFile(hfsStream, KnownSevenZipFormat.Hfs);
-        }
-
-        public IEnumerable<IArchiveEntry> Entries()
-        {
-            // The contents of the archive is entirely contained in a root folder called "factorio".
-            // Strip this folder name from the base of all paths before yielding each entry.
-            // For example: the path factorio/.DS_Store becomes .DS_Store
-
-            foreach (var entry in _archive.Entries)
+            string tempDir;
+            try
             {
-                var fileRelativePath = entry.FileName;
-                Debug.Assert(fileRelativePath.StartsWith(ArchiveRootDirectoryName));
-
-                var trimmedFileRelativePath = fileRelativePath
-                    .Substring(ArchiveRootDirectoryName.Length + 1);
-                // Exclude 1 extra character from the substring
-                // so that the directory seperator character is also trimmed from the string.
-
-                // Exclude the root folder, as we are trying to hide it's existence.
-                // The root folder path is an empty string after the trim operation.
-                if (string.IsNullOrWhiteSpace(trimmedFileRelativePath))
-                    continue;
-
-                yield return new SevenZipEntryToArchiveEntryAdapter(entry, entry.IsFolder, trimmedFileRelativePath);
+                tempDir = FileUtils.GetTempDir();
             }
-        }
+            catch (IOException ex)
+            {
+                throw new ArchiveException(ex.Message, ex);
+            }
 
-        public void Dispose()
-        {
-            _archive.Dispose();
+            try
+            {
+                await SevenZip.ExtractArchive(archiveFile, tempDir);
+
+                var directories = Directory.EnumerateDirectories(tempDir).ToList();
+                if (directories.Count != 1)
+                    throw new InvalidGameArchiveContentsException();
+
+                var innerTempFolder = directories[0];
+                FileUtils.MoveDirectoryAcrossVolume(innerTempFolder, outputDir);
+            }
+            catch (IOException ex)
+            {
+                throw new ArchiveException(ex.Message, ex);
+            }
+            catch (SecurityException ex)
+            {
+                throw new UnauthorizedAccessException(ex.Message, ex);
+            }
+            finally
+            {
+                if (tempDir != null)
+                    Directory.Delete(tempDir, recursive: true);
+            }
         }
     }
 }

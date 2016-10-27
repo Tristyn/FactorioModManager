@@ -11,6 +11,6 @@ namespace FactorioModManager.Lib.Files
             : base(message) { }
 
         public IllegalPathCharactersException(string message, Exception innerException)
-         : base(message, innerException) { }
+            : base(message, innerException) { }
     }
 }

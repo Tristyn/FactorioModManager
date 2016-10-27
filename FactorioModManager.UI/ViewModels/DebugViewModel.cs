@@ -1,15 +1,11 @@
 ﻿using System;
 using System.IO;
-using System.Linq;
 using System.Security;
-using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Windows.Input;
 using FactorioModManager.Lib;
-using FactorioModManager.Lib.Archive;
 using FactorioModManager.Lib.Models;
-using FactorioModManager.Lib.Web;
 using FactorioModManager.UI.Dialogs;
 using FactorioModManager.UI.Framework;
 using Nito.AsyncEx;
@@ -33,8 +29,7 @@ namespace FactorioModManager.UI.ViewModels
             InitTask = NotifyTaskCompletion.Create(Initialize);
             ChangeWorkingFolder = new Command(ChangeWorkingFolderHandler);
             NewInstallCommand = new AsyncCommand(async token => await NewInstallHandler());
-            InstallZipCommand = new AsyncCommand(async token => await InstallZipHandler());
-            
+
             this.WhenAnyValue(model => model.SelectedInstallationSpec)
                 .InvokeCommand(ReactiveCommand.CreateAsyncTask(
                 o => LoadInstallation(SelectedInstallationSpec)));
@@ -163,7 +158,7 @@ namespace FactorioModManager.UI.ViewModels
             get { return _selectedInstallationSpec; }
             set { this.RaiseAndSetIfChanged(ref _selectedInstallationSpec, value); }
         }
-        
+
         public InstallationViewModel Installation
         {
             get { return _installation; }
@@ -179,67 +174,8 @@ namespace FactorioModManager.UI.ViewModels
             using (await _lock.LockAsync())
                 model = await _factorio.GetStandaloneInstallation(spec);
 
-            
+
             Installation = new InstallationViewModel(model);
-        }
-
-        public ICommand InstallZipCommand { get; }
-
-        private async Task InstallZipHandler()
-        {
-            var selectedInstall = SelectedInstallationSpec;
-            if (selectedInstall == null)
-                return;
-
-            var os = OperatingSystemEx.CurrentOS;
-            var archiveSpec = new GameArchiveSpec(selectedInstall, os);
-            var archiveExtension = GameArchiveSpec.GetArchiveExtension(os);
-
-            var zipDialog = new OpenFileDialog
-            {
-                AutoUpgradeEnabled = true,
-                CheckFileExists = true,
-                DefaultExt = archiveExtension,
-                SupportMultiDottedExtensions = true,
-                Filter = string.Format("Archive Files (*{0}) | *{0}", archiveExtension)
-            };
-
-            if (zipDialog.ShowDialog() != DialogResult.OK)
-                return;
-
-            try
-            {
-                Installation install = null;
-                await Task.Run(async () =>
-                {
-                    using (await _lock.LockAsync())
-                    {
-                        install = await _factorio.GetStandaloneInstallation(selectedInstall);
-                    }
-                    
-                    using (var archive = new GameArchive(zipDialog.FileName, archiveSpec))
-                    {
-                        await install.InstallFromArchive(archive);
-                    }
-                });
-            }
-            catch (UnauthorizedAccessException)
-            {
-                Error = "Unauthorized access";
-            }
-            catch (DirectoryNotFoundException)
-            {
-                Error = "The specified path is invalid (for example, it is on an unmapped drive).";
-            }
-            catch (IOException)
-            {
-                Error = "The directory is a file.-or-The network name is not known.";
-            }
-            catch (SecurityException)
-            {
-                Error = "Security exception";
-            }
-
         }
 
         #endregion

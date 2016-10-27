@@ -71,10 +71,8 @@ namespace FactorioModManager.UI.ViewModels
 
             try
             {
-                using (var archive = new GameArchive(InstallFileArchiveFilePath, archiveSpec))
-                {
-                    await Model.InstallFromArchive(archive);
-                }
+                var archive = new GameArchive(InstallFileArchiveFilePath, archiveSpec);
+                await Model.InstallFromArchive(archive);
             }
             catch (UnauthorizedAccessException)
             {
@@ -103,7 +101,7 @@ namespace FactorioModManager.UI.ViewModels
         public string Status => string.Format("Status: {0}", _status.Value);
 
         public InstallationSpec Spec => _model.Spec;
-        
+
         public IReactiveCommand RefreshStatus { get; }
 
         public string InstallFileArchiveFilePath

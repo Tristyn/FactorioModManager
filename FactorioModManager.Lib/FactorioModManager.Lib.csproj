@@ -135,6 +135,7 @@
     <Compile Include="Contracts\IModPackManager.cs" />
     <Compile Include="Files\IllegalPathCharactersException.cs" />
     <Compile Include="Files\FileUtils.cs" />
+    <Compile Include="Files\InvalidPathException.cs" />
     <Compile Include="Files\ShortcutFile.cs" />
     <Compile Include="Models\ModPackDirectory.cs" />
     <Compile Include="Web\AuthorizedFactorioWebClient.cs" />

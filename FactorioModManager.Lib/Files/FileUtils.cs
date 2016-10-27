@@ -1,14 +1,41 @@
 ﻿using System;
 using System.IO;
+using System.Security;
 
 namespace FactorioModManager.Lib.Files
 {
     public static class FileUtils
     {
+        /// <exception cref="UnauthorizedAccessException">The caller does not have the required permission.</exception>
+        /// <exception cref="InvalidPathException"></exception>
+        /// <exception cref="PathTooLongException"></exception>
+        /// <exception cref="IOException">The directory specified by <paramref name="path" /> is a file.-or-The network name is not known.</exception>
         public static string GetTempDir()
         {
-            string tempDirectory = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
-            Directory.CreateDirectory(tempDirectory);
+            string tempPath;
+            try
+            {
+                tempPath = Path.GetTempPath();
+            }
+
+            catch (SecurityException ex)
+            {
+                throw new UnauthorizedAccessException(ex.Message, ex);
+            }
+
+            var tempDirectory = Path.Combine(tempPath, Path.GetRandomFileName());
+            try
+            {
+                Directory.CreateDirectory(tempDirectory);
+            }
+            catch (DirectoryNotFoundException ex)
+            {
+                throw new InvalidPathException("Temp dir could not be found", ex);
+            }
+            catch (NotSupportedException ex)
+            {
+                throw new InvalidPathException(ex.Message, ex);
+            }
             return tempDirectory;
         }
 
