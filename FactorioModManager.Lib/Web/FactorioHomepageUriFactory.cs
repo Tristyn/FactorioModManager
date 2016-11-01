@@ -1,33 +1,19 @@
 ﻿using System;
-using FactorioModManager.Lib.Models;
 using OperatingSystem = FactorioModManager.Lib.Models.OperatingSystem;
 
 namespace FactorioModManager.Lib.Web
 {
     /// <summary>
-    /// Provides well-formed uris for resources at www.factorio.com
+    /// Provides uris for resources at www.factorio.com
     /// </summary>
     class FactorioHomepageUriFactory
     {
         private readonly Uri _homepageUriBase;
         private readonly Uri _gameArchiveDownloadsUriBase;
-
-        private static readonly Uri DefaultHomepageUriBase = new Uri("https://www.factorio.com/");
-
         
         public FactorioHomepageUriFactory()
-            : this(DefaultHomepageUriBase)
         {
-            
-        }
-
-        /// <param name="homepageUriBase">Override the default homepage uri "https://www.factorio.com/" with another one.</param>
-        public FactorioHomepageUriFactory(Uri homepageUriBase)
-        {
-            if (homepageUriBase == null)
-                throw new ArgumentNullException("homepageUriBase");
-
-            _homepageUriBase = homepageUriBase;
+            _homepageUriBase = new Uri("https://www.factorio.com/");
             _gameArchiveDownloadsUriBase = new Uri(_homepageUriBase, "get-download/");
         }
 
@@ -44,6 +30,7 @@ namespace FactorioModManager.Lib.Web
         /// <summary>
         /// Returns an archive download link that returns a game archive for the specified OperatingSystem, game version, bitness and client type.
         /// </summary>
+        /// <exception cref="ArgumentOutOfRangeException">The value of spec.OperatingSystem wasn't expected.</exception>
         public Uri GetGameArchiveDownloadUri(GameArchiveSpec spec)
         {
             /* uri format: factorio.com/get-download/{version}/{build}/{platform}

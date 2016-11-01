@@ -23,7 +23,16 @@ namespace FactorioModManager.Lib.Models
 
         public override string ToString()
         {
-            return string.Format("{0}.{1}.{2}", MajorVersion, MinorVersion, Revision);
+            return ToString(".");
+        }
+
+        /// <exception cref="ArgumentNullException"><paramref name="delimiter"/> is <see langword="null" />.</exception>
+        public string ToString(string delimiter)
+        {
+            if (delimiter == null)
+                throw new ArgumentNullException("delimiter");
+
+            return MajorVersion + delimiter + MinorVersion + delimiter + Revision;
         }
 
         private bool Equals(VersionNumber other)

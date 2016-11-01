@@ -137,15 +137,24 @@
     <Compile Include="Files\FileUtils.cs" />
     <Compile Include="Files\InvalidPathException.cs" />
     <Compile Include="Files\ShortcutFile.cs" />
-    <Compile Include="Models\ModPackDirectory.cs" />
+    <Compile Include="Models\ModDownloadSpec.cs" />
+    <Compile Include="Models\ModIOStrategy.cs" />
+    <Compile Include="Models\ModPack.cs" />
+    <Compile Include="Models\WebPortalModIOStrategy.cs" />
     <Compile Include="Web\AuthorizedFactorioWebClient.cs" />
+    <Compile Include="Web\FactorioModPortalUriFactory.cs" />
+    <Compile Include="Web\FactorioUserCredentials.cs" />
+    <Compile Include="Web\FactorioUserSession.cs" />
+    <Compile Include="Web\InvalidUsernameAndPasswordException.cs" />
+    <Compile Include="Web\LoginSessionExpiredException.cs" />
+    <Compile Include="Web\NetworkConnectionException.cs" />
     <Compile Include="Web\IAnonymousFactorioWebClient.cs" />
     <Compile Include="Contracts\INetworkActivityRecorder.cs" />
     <Compile Include="InstallationRepository.cs" />
     <Compile Include="Installation.cs" />
     <Compile Include="InstallationFactory.cs" />
     <Compile Include="Models\CpuArchitecture.cs" />
-    <Compile Include="Web\FactorioAuthToken.cs" />
+    <Compile Include="Web\FactorioUserSessionToken.cs" />
     <Compile Include="Web\GameArchiveFeed.cs" />
     <Compile Include="Web\GameArchiveSpec.cs" />
     <Compile Include="Models\InstallationSpec.cs" />
@@ -170,6 +179,9 @@
       <Isolated>False</Isolated>
       <EmbedInteropTypes>True</EmbedInteropTypes>
     </COMReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Mods\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

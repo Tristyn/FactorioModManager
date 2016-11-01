@@ -91,7 +91,7 @@ namespace FactorioModManager.Lib
             }
         }
 
-        public void SetModPack(ModPackDirectory modPackDirectory)
+        public void SetModPack(/*ModPackDirectory modPackDirectory*/ string directory)
         {
             // Fuck the mods directory, we only use shortcuts and sym links
             var modsPath = Path.Combine(_storageDirectory, "mods");
@@ -105,7 +105,7 @@ namespace FactorioModManager.Lib
                 // among many possible reasons, 'mods' may be a symlink file which caused the exception
             }
 
-            _modPackShortcut.SetTarget(modPackDirectory.Directory);
+            _modPackShortcut.SetTarget(directory);
         }
 
         public string GetExecutableAbsolutePath()
