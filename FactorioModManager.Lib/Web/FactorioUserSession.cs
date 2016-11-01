@@ -5,6 +5,7 @@ using System.Net.Http;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
 using Nito.AsyncEx;
+using NodaTime;
 
 namespace FactorioModManager.Lib.Web
 {
@@ -13,6 +14,8 @@ namespace FactorioModManager.Lib.Web
     /// </summary>
     public class FactorioUserSession
     {
+        private static readonly Duration SessionTokenValidDuration = Duration.FromDays(13);
+
         private readonly AnonymousFactorioWebClient _client;
         private readonly AsyncLock _lock = new AsyncLock();
         private readonly Func<Tuple<
@@ -20,6 +23,7 @@ namespace FactorioModManager.Lib.Web
             IObserver<FactorioAuthResult>>> _challengeResponseFactory;
         
         private FactorioUserSessionToken _sessionToken;
+        private Instant _sessionTokenExpiryDate;
 
         public FactorioUserSession(AnonymousFactorioWebClient client, Func<Tuple<IObservable<FactorioUserCredentials>, IObserver<FactorioAuthResult>>> challengeResponseFactory)
         {
@@ -48,7 +52,8 @@ namespace FactorioModManager.Lib.Web
         {
             using (await _lock.LockAsync())
             {
-                if (_sessionToken != null)
+                if (_sessionTokenExpiryDate > SystemClock.Instance.GetCurrentInstant() 
+                    || _sessionToken != null)
                     return _sessionToken.ToCookieCollection();
 
                 var credentialsSource = _challengeResponseFactory();
@@ -73,8 +78,10 @@ namespace FactorioModManager.Lib.Web
                         }
 
                         _sessionToken = await _client.Authorize(credentials);
+
                         // Clear the exception because we authed successfully
                         lastAuthException = null;
+                        _sessionTokenExpiryDate = SystemClock.Instance.GetCurrentInstant() + SessionTokenValidDuration;
                         challengeResponsesStream.OnNext(FactorioAuthResult.Success);
                     }
                     catch (InvalidUsernameAndPasswordException ex)
