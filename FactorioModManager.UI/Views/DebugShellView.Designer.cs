@@ -30,7 +30,7 @@
         {
             this.InstallationsList = new System.Windows.Forms.ListBox();
             this.label2 = new System.Windows.Forms.Label();
-            this.InstallationView = new ReactiveUI.Winforms.ViewModelControlHost();
+            this.InstallationView = new FactorioModManager.UI.Views.InstallationView();
             this.SuspendLayout();
             // 
             // InstallationsList
@@ -52,13 +52,10 @@
             // 
             // InstallationView
             // 
-            this.InstallationView.CacheViews = false;
-            this.InstallationView.DefaultContent = null;
             this.InstallationView.Location = new System.Drawing.Point(12, 192);
             this.InstallationView.Name = "InstallationView";
-            this.InstallationView.Size = new System.Drawing.Size(133, 113);
-            this.InstallationView.TabIndex = 6;
-            this.InstallationView.ViewLocator = null;
+            this.InstallationView.Size = new System.Drawing.Size(133, 123);
+            this.InstallationView.TabIndex = 7;
             this.InstallationView.ViewModel = null;
             // 
             // DebugShellView
@@ -79,6 +76,6 @@
         #endregion
         private System.Windows.Forms.ListBox InstallationsList;
         private System.Windows.Forms.Label label2;
-        private ReactiveUI.Winforms.ViewModelControlHost InstallationView;
+        private InstallationView InstallationView;
     }
 }

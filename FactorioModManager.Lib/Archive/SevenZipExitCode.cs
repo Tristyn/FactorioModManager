@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace FactorioModManager.Lib.Archive
+﻿namespace FactorioModManager.Lib.Archive
 {
     enum SevenZipExitCode
     {

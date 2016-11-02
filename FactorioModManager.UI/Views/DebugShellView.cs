@@ -2,6 +2,7 @@
 using System.Windows.Forms;
 using FactorioModManager.UI.ViewModels;
 using ReactiveUI;
+using Splat;
 
 namespace FactorioModManager.UI.Views
 {
@@ -9,6 +10,9 @@ namespace FactorioModManager.UI.Views
     {
         public DebugShellView()
         {
+            if (Startup.IsInDesignMode)
+                return;
+            
             AutoScaleMode = AutoScaleMode.Font;
             InitializeComponent();
             

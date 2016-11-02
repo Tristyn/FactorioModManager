@@ -1,6 +1,5 @@
 ﻿using System;
 using System.IO;
-using CsQuery.EquationParser.Implementation;
 
 namespace FactorioModManager.Lib.Models
 {
@@ -22,11 +21,13 @@ namespace FactorioModManager.Lib.Models
                 switch (OperatingSystemEx.CurrentOS)
                 {
                     case OperatingSystem.Windows:
-                        return Path.Combine("bin", "factorio.exe");
+                        var windowsArch = Architecture == CpuArchitecture.X86 ? "Win32" : "x64";
+                        return Path.Combine("bin", windowsArch, "factorio.exe");
                     case OperatingSystem.Mac:
                         return Path.Combine("factorio.app", "Contents", "macOS", "factorio");
                     case OperatingSystem.Linux:
-                        return Path.Combine("bin", "factorio");
+                        var linuxArch = Architecture == CpuArchitecture.X86 ? "i386" : "x64";
+                        return Path.Combine("bin", linuxArch, "factorio");
                     default:
                         throw new ArgumentOutOfRangeException();
                 }
@@ -89,7 +90,7 @@ namespace FactorioModManager.Lib.Models
             if (ReferenceEquals(a, b)) return false;
             if (ReferenceEquals(a, null)) return true;
             if (ReferenceEquals(b, null)) return true;
-            
+
             return a.Version != b.Version
                 && a.Architecture != b.Architecture
                 && a.BuildConfiguration != b.BuildConfiguration;
@@ -100,8 +101,8 @@ namespace FactorioModManager.Lib.Models
             unchecked
             {
                 var hashCode = Version?.GetHashCode() ?? 0;
-                hashCode = (hashCode*397) ^ (int) Architecture;
-                hashCode = (hashCode*397) ^ (int) BuildConfiguration;
+                hashCode = (hashCode * 397) ^ (int)Architecture;
+                hashCode = (hashCode * 397) ^ (int)BuildConfiguration;
                 return hashCode;
             }
         }
@@ -111,15 +112,15 @@ namespace FactorioModManager.Lib.Models
             if (ReferenceEquals(null, obj)) return false;
             if (ReferenceEquals(this, obj)) return true;
             if (obj.GetType() != GetType()) return false;
-            return Equals((InstallationSpec) obj);
+            return Equals((InstallationSpec)obj);
         }
 
         public bool Equals(InstallationSpec other)
         {
             if (ReferenceEquals(null, other)) return false;
             if (ReferenceEquals(this, other)) return true;
-            return Equals(Version, other.Version) 
-                && Architecture == other.Architecture 
+            return Equals(Version, other.Version)
+                && Architecture == other.Architecture
                 && BuildConfiguration == other.BuildConfiguration;
         }
     }

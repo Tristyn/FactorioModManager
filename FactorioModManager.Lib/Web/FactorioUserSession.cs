@@ -21,7 +21,7 @@ namespace FactorioModManager.Lib.Web
         private readonly Func<Tuple<
             IObservable<FactorioUserCredentials>,
             IObserver<FactorioAuthResult>>> _challengeResponseFactory;
-        
+
         private FactorioUserSessionToken _sessionToken;
         private Instant _sessionTokenExpiryDate;
 
@@ -52,9 +52,11 @@ namespace FactorioModManager.Lib.Web
         {
             using (await _lock.LockAsync())
             {
-                if (_sessionTokenExpiryDate > SystemClock.Instance.GetCurrentInstant() 
-                    || _sessionToken != null)
+                if (_sessionToken != null
+                    && SystemClock.Instance.GetCurrentInstant() < _sessionTokenExpiryDate)
+                {
                     return _sessionToken.ToCookieCollection();
+                }
 
                 var credentialsSource = _challengeResponseFactory();
 

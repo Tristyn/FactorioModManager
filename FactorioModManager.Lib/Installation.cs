@@ -1,4 +1,6 @@
 ﻿using System;
+using System.ComponentModel;
+using System.Diagnostics;
 using System.IO;
 using System.Reactive.Subjects;
 using System.Threading.Tasks;
@@ -17,13 +19,15 @@ namespace FactorioModManager.Lib
         {
             get { return _status; }
         }
-        
+
         private readonly string _storageDirectory;
         private readonly ShortcutFile _modPackShortcut;
         private readonly ShortcutFile _savesShortcut;
         private readonly ShortcutFile _configShortcut;
-        private readonly AsyncLock _directoryLock = new AsyncLock();
-        private readonly BehaviorSubject<InstallationStatus> _status= new BehaviorSubject<InstallationStatus>(InstallationStatus.Unknown);
+        private readonly AsyncLock _lock = new AsyncLock();
+        private readonly BehaviorSubject<InstallationStatus> _status = new BehaviorSubject<InstallationStatus>(InstallationStatus.Unknown);
+
+        private Process _gameProcess;
 
         /// <exception cref="ArgumentNullException"><paramref name="spec"/> or <paramref name="storageDirectory"/> is <see langword="null" />.</exception>
         internal Installation(InstallationSpec spec, string storageDirectory)
@@ -32,7 +36,7 @@ namespace FactorioModManager.Lib
                 throw new ArgumentNullException("spec");
             if (storageDirectory == null)
                 throw new ArgumentNullException("storageDirectory");
-            
+
             Spec = spec;
             _storageDirectory = storageDirectory;
             _modPackShortcut = ShortcutFile.New(Path.Combine(storageDirectory, "mods"));
@@ -42,7 +46,7 @@ namespace FactorioModManager.Lib
 
         public async Task<InstallationStatus> RefreshStatus()
         {
-            using (await _directoryLock.LockAsync())
+            using (await _lock.LockAsync())
             {
                 return RefreshStatusInternal();
             }
@@ -50,11 +54,17 @@ namespace FactorioModManager.Lib
 
         private InstallationStatus RefreshStatusInternal()
         {
-            var executableExists = Directory.Exists(GetExecutableAbsolutePath());
+            if (_gameProcess != null && !_gameProcess.HasExited)
+            {
+                _status.OnNext(InstallationStatus.Running);
+                return InstallationStatus.Running;
+            }
 
-            var nextStatus = executableExists 
-                ? InstallationStatus.Ready 
-                : InstallationStatus.NonExistant;
+            var gameBinaryExists = File.Exists(GetExecutableAbsolutePath());
+
+            var nextStatus = gameBinaryExists
+                ? InstallationStatus.Ready
+                : InstallationStatus.NotReady;
 
             _status.OnNext(nextStatus);
             return nextStatus;
@@ -62,6 +72,11 @@ namespace FactorioModManager.Lib
 
         /// <exception cref="ArgumentNullException"><paramref name="archive"/> is <see langword="null" />.</exception>
         /// <exception cref="ArgumentException">Platform Mismatch: The operating system is not compatible with the archive files.</exception>
+        /// <exception cref="ArchiveException"></exception>
+        /// <exception cref="InvalidGameArchiveContentsException"></exception>
+        /// <exception cref="UnauthorizedAccessException">The caller does not have the required permission.</exception>
+        /// <exception cref="FailedToLaunchSevenZipException">The 7Zip executable could not be found or failed to launch.</exception>
+        /// <exception cref="SevenZipExitCodeException">Seven zip returned with a bad exit code.</exception>
         public async Task InstallFromArchive(GameArchive archive)
         {
             if (archive == null)
@@ -73,20 +88,17 @@ namespace FactorioModManager.Lib
             if (currentOs != archiveOs)
                 throw new ArgumentException("Platform Mismatch: The operating system is not compatible with the archive files.", "archive");
 
-            using (await _directoryLock.LockAsync())
+            using (await _lock.LockAsync())
             {
+                _status.OnNext(InstallationStatus.Installing);
+
                 try
                 {
-                    _status.OnNext(InstallationStatus.Installing);
-                    
                     await archive.Extract(_storageDirectory);
-
-                    RefreshStatusInternal();
                 }
-                catch
+                finally
                 {
-                    _status.OnNext(InstallationStatus.Unknown);
-                    throw;
+                    RefreshStatusInternal();
                 }
             }
         }
@@ -111,6 +123,30 @@ namespace FactorioModManager.Lib
         public string GetExecutableAbsolutePath()
         {
             return Path.Combine(_storageDirectory, Spec.ExecutableRelativePath);
+        }
+
+        public async Task<bool> LaunchGame()
+        {
+            using (await _lock.LockAsync())
+            {
+                var status = RefreshStatusInternal();
+                if (status != InstallationStatus.Ready)
+                    return false;
+
+                var gameBinary = GetExecutableAbsolutePath();
+                try
+                {
+                    _gameProcess = Process.Start(gameBinary);
+                    _status.OnNext(InstallationStatus.Running);
+                }
+                catch (Win32Exception ex)
+                {
+                    // Binary not found or invalid format
+                    _status.OnNext(InstallationStatus.NotReady);
+                    return false;
+                }
+                return true;
+            }
         }
 
         public override string ToString()

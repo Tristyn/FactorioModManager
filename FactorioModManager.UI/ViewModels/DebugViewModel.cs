@@ -174,7 +174,6 @@ namespace FactorioModManager.UI.ViewModels
             using (await _lock.LockAsync())
                 model = await _factorio.GetStandaloneInstallation(spec);
 
-
             Installation = new InstallationViewModel(model);
         }
 

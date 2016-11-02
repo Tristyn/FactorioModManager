@@ -42,9 +42,7 @@ namespace FactorioModManager.Lib
 
             Directory.CreateDirectory(gamePath);
 
-            var install = new Installation(spec, gamePath);
-            await install.RefreshStatus();
-            return install;
+            return new Installation(spec, gamePath);
         }
     }
 }

@@ -25,10 +25,10 @@ namespace FactorioModManager.Lib.Web
         public AuthorizedFactorioWebClient(FactorioUserSession userSession)
         {
             if (userSession == null)
-                throw new ArgumentNullException("userSessionToken");
+                throw new ArgumentNullException("userSession");
 
             _userSession = userSession;
-            
+
             // set up HttpClient with user auth cookies
             _clientCookies = new CookieContainer();
             var httpClientHandler = new HttpClientHandler
@@ -37,7 +37,6 @@ namespace FactorioModManager.Lib.Web
                 CookieContainer = _clientCookies
             };
             _client = new HttpClient(httpClientHandler);
-
         }
 
         // ReSharper disable ExceptionNotThrown
@@ -81,7 +80,7 @@ namespace FactorioModManager.Lib.Web
         }
 
         /// <summary>
-        /// Note: the path extension may change during this operation based on the archive format received.
+        /// Note: the extension component of the destination path in the GameArchive result may be different based on the archive format received.
         /// </summary>
         /// <exception cref="SecurityException">The caller does not have the required permission to access the file.</exception>
         /// <exception cref="ArgumentNullException"><paramref name="spec"/> or <paramref name="destinationPath"/> is <see langword="null" />.</exception>
@@ -127,41 +126,50 @@ namespace FactorioModManager.Lib.Web
         public async Task<bool> IsAuthorized()
         {
             var homepageUri = _homepageUriFactory.GetGameArchiveFeedPageUri(false, false);
-            var downloadsPageResult = await _client.GetAsync(homepageUri, HttpCompletionOption.ResponseHeadersRead);
-            downloadsPageResult.EnsureSuccessStatusCode();
-
-            // Status code 200: authorized, 302: Unauthorized, any other is exceptional
+            var homepageResponse = await _client.SendAsync(new HttpRequestMessage(HttpMethod.Get, homepageUri), HttpCompletionOption.ResponseHeadersRead);
+            homepageResponse.EnsureSuccessStatusCode();
             bool isAuthorizedHomepage;
-            switch (downloadsPageResult.StatusCode)
+
+            // If we get redirected, we must not be authorized.
+            // Assumption: any redirect is to ~/login
+            if (homepageResponse.StatusCode == HttpStatusCode.OK)
             {
-                case HttpStatusCode.OK:
+                if (homepageResponse.RequestMessage.RequestUri == homepageUri)
+                {
                     isAuthorizedHomepage = true;
-                    break;
-                case HttpStatusCode.Redirect:
+                }
+                else
+                {
                     isAuthorizedHomepage = false;
-                    break;
-                default:
-                    throw new HttpRequestException(downloadsPageResult.StatusCode.ToString());
+                }
+            }
+            else
+            {
+                throw new HttpRequestException(homepageResponse.StatusCode.ToString());
             }
 
             if (!isAuthorizedHomepage)
                 return false;
 
             var modsUri = _modPortalUriFactory.GetModPortalHomepageUri();
-            var modPortalResult = await _client.GetAsync(modsUri, HttpCompletionOption.ResponseHeadersRead);
+            var modPortalResult = await _client.SendAsync(new HttpRequestMessage (HttpMethod.Get, modsUri), HttpCompletionOption.ResponseHeadersRead);
             modPortalResult.EnsureSuccessStatusCode();
 
             bool isAuthorizedModPortal;
-            switch (modPortalResult.StatusCode)
+            if (modPortalResult.StatusCode == HttpStatusCode.OK)
             {
-                case HttpStatusCode.OK:
-                    isAuthorizedModPortal = true;
-                    break;
-                case HttpStatusCode.Redirect:
+                if (modPortalResult.RequestMessage.RequestUri == modsUri)
+                {
+                    isAuthorizedModPortal= true;
+                }
+                else
+                {
                     isAuthorizedModPortal = false;
-                    break;
-                default:
-                    throw new HttpRequestException(modPortalResult.StatusCode.ToString());
+                }
+            }
+            else
+            {
+                throw new HttpRequestException(modPortalResult.StatusCode.ToString());
             }
 
             return isAuthorizedModPortal;

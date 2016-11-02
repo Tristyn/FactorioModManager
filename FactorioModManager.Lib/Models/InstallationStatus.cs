@@ -4,9 +4,10 @@ namespace FactorioModManager.Lib.Models
 {
     public enum InstallationStatus
     {
-        Unknown,
-        NonExistant,
+        Unknown = 0,
+        NotReady,
         Installing,
-        Ready
+        Ready,
+        Running
     }
 }

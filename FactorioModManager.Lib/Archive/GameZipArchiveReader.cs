@@ -12,7 +12,7 @@ namespace FactorioModManager.Lib.Archive
         /// <exception cref="ArgumentNullException"><paramref name="archiveFile"/> or <paramref name="outputDir"/> is <see langword="null" />.</exception>
         /// <exception cref="FailedToLaunchSevenZipException">The 7Zip executable could not be found or failed to launch.</exception>
         /// <exception cref="SevenZipExitCodeException">Seven zip returned with a bad exit code.</exception>
-        /// <exception cref="UnauthorizedAccessException">The caller does not have the required permission.</exception>
+        /// <exception cref="UnauthorizedAccessException">The caller does not have the required permission to access <param name="outputDir"/>.</exception>
         /// <exception cref="InvalidGameArchiveContentsException"></exception>
         /// <exception cref="ArchiveException"></exception>
         public async Task ExtractToDir(string archiveFile, string outputDir)
@@ -33,7 +33,7 @@ namespace FactorioModManager.Lib.Archive
             }
             catch (IOException ex)
             {
-                throw new ArchiveException(ex.Message, ex);
+                throw new ArchiveException("Failed to acquire temp dir for archive extraction.", ex);
             }
 
             try

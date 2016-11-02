@@ -1,10 +1,12 @@
-﻿using System.ComponentModel;
+﻿using System;
+using System.ComponentModel;
 using System.Reactive.Linq;
 using System.Windows.Forms;
 using FactorioModManager.Lib.Models;
 using FactorioModManager.Lib.Web;
 using FactorioModManager.UI.ViewModels;
 using ReactiveUI;
+using Splat;
 
 namespace FactorioModManager.UI.Views
 {
@@ -14,28 +16,39 @@ namespace FactorioModManager.UI.Views
 
         public InstallationView()
         {
+            if (Startup.IsInDesignMode)
+                return;
+
             InitializeComponent();
 
             this.WhenAnyValue(view => view.ViewModel.Status)
                 .Select(s => s.ToString())
                 .BindTo(this, view => view.Status.Text);
-
+            
             this.WhenAnyValue(view => view.ViewModel.Spec)
                 .Select(spec => spec.ToString())
                 .BindTo(this, view => view.Spec.Text);
+
+            this.BindCommand(_viewModel,
+                viewModel => viewModel.RefreshStatus,
+                view => view.RefreshBtn);
+
+            this.BindCommand(_viewModel,
+                viewModel => viewModel.Play,
+                view => view.PlayBtn);
 
             Observable.FromEventPattern(
                 ev => InstallArchiveBtn.Click += ev,
                 ev => InstallArchiveBtn.Click -= ev)
                 .Select(eventArgs => ViewModel?.Spec)
                 .Select(OpenArchiveDialogImpl)
-                .Do(archivePath =>
+                .Subscribe(archivePath =>
                 {
                     ViewModel.InstallFileArchiveFilePath = archivePath;
                     if (ViewModel?.InstallFileArchive.CanExecute(null) == true)
                         ViewModel?.InstallFileArchive.Execute(null);
-                })
-                .Publish().Connect();
+                });
+
             this.WhenAnyObservable(view => view.ViewModel.InstallFileArchive.CanExecuteObservable)
                 .BindTo(this, view => view.InstallArchiveBtn.Enabled);
 

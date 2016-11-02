@@ -34,6 +34,11 @@ namespace FactorioModManager.UI.ViewModels
                 .Select(status => status.ToString())
                 .ToProperty(this, viewModel => viewModel.Status, out _status);
 
+            RefreshStatus = ReactiveCommand.CreateAsyncTask(
+                this.WhenAnyObservable(viewModel => viewModel.Model.Status)
+                    .Select(status => status == InstallationStatus.Ready),
+                o =>  Model.LaunchGame());
+
             RefreshStatus = ReactiveCommand.CreateAsyncTask(o => Model.RefreshStatus());
 
             InstallFileArchive = ReactiveCommand.CreateAsyncTask(o => InstallArchiveImpl());
@@ -103,6 +108,8 @@ namespace FactorioModManager.UI.ViewModels
         public InstallationSpec Spec => _model.Spec;
 
         public IReactiveCommand RefreshStatus { get; }
+
+        public IReactiveCommand Play { get; }
 
         public string InstallFileArchiveFilePath
         {

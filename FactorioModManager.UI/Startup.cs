@@ -1,7 +1,6 @@
 ﻿using System;
-using System.Reactive.Linq;
+using System.Reactive.Concurrency;
 using System.Windows.Forms;
-using FactorioModManager.UI.ViewModels;
 using FactorioModManager.UI.Views;
 using ReactiveUI;
 using Splat;
@@ -10,26 +9,21 @@ namespace FactorioModManager.UI
 {
     public static class Startup
     {
-        private static Action<Delegate> _invokeOnMainThread;
+        static Startup()
+        {
+            // AAaaaaahhhhh M$FT
+            IsInDesignMode = System.Reflection.Assembly.GetExecutingAssembly()
+                 .Location.Contains("VisualStudio");
+        }
 
         [STAThread]
         public static void Main(string[] args)
         {
+            RxApp.MainThreadScheduler = Scheduler.CurrentThread;
             InitializeDependancyResolver();
 
             Application.EnableVisualStyles();
-            var form = new DebugShellView();
-
-            _invokeOnMainThread = action => form.Invoke(action);
-            
-            Application.Run(form);
-
-            
-        }
-
-        public static void UIInvoke(Delegate action)
-        {
-            _invokeOnMainThread(action);
+            Application.Run(new DebugShellView());
         }
 
         private static void InitializeDependancyResolver()
@@ -39,7 +33,9 @@ namespace FactorioModManager.UI
             container.InitializeSplat();
             container.InitializeReactiveUI();
 
-            container.Register(() => new InstallationView(), typeof(IViewFor<InstallationViewModel>));
+            container.Register(() => new ConsoleLogger(), typeof(ILogger));
         }
+
+        public static bool IsInDesignMode { get; }
     }
 }
