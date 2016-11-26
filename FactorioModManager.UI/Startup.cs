@@ -1,6 +1,6 @@
 ﻿using System;
-using System.Reactive.Concurrency;
 using System.Windows.Forms;
+using System.Windows.Threading;
 using FactorioModManager.UI.Views;
 using ReactiveUI;
 using Splat;
@@ -17,9 +17,12 @@ namespace FactorioModManager.UI
         }
 
         [STAThread]
-        public static void Main(string[] args)
+        public static void Main()
         {
-            RxApp.MainThreadScheduler = Scheduler.CurrentThread;
+            // Initialize the dispatcher.
+            // RxUI may throw up if the thread doesn't have a dispatcher.
+            var disp = Dispatcher.CurrentDispatcher;
+
             InitializeDependancyResolver();
 
             Application.EnableVisualStyles();

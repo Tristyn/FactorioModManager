@@ -7,6 +7,7 @@ using System.Windows.Input;
 using FactorioModManager.Lib;
 using FactorioModManager.Lib.Models;
 using FactorioModManager.UI.Dialogs;
+using FactorioModManager.UI.Extensions;
 using FactorioModManager.UI.Framework;
 using Nito.AsyncEx;
 using ReactiveUI;
@@ -26,14 +27,22 @@ namespace FactorioModManager.UI.ViewModels
 
         public DebugViewModel()
         {
-            InitTask = NotifyTaskCompletion.Create(Initialize);
             ChangeWorkingFolder = new Command(ChangeWorkingFolderHandler);
             NewInstallCommand = new AsyncCommand(async token => await NewInstallHandler());
 
-            this.WhenAnyValue(model => model.SelectedInstallationSpec)
-                .InvokeCommand(ReactiveCommand.CreateAsyncTask(
-                o => LoadInstallation(SelectedInstallationSpec)));
+            this.WhenActivated(disposable =>
+            {
+                var loadInstallation = ReactiveCommand.CreateAsyncTask(
+                        o => LoadInstallation(SelectedInstallationSpec))
+                    .AddTo(disposable);
 
+                this.WhenAnyValue(model => model.SelectedInstallationSpec)
+                    .InvokeCommand(loadInstallation)
+                    .AddTo(disposable);
+
+                var dir = Path.Combine(Environment.CurrentDirectory, "working-folder");
+                SetWorkingFolder(dir);
+            });
         }
 
         public string Error
@@ -41,18 +50,6 @@ namespace FactorioModManager.UI.ViewModels
             get { return _error; }
             private set { this.RaiseAndSetIfChanged(ref _error, value); }
         }
-
-        public async Task Initialize()
-        {
-            if (_initialized)
-                return;
-            _initialized = true;
-
-            var dir = Path.Combine(Environment.CurrentDirectory, "working-folder");
-            SetWorkingFolder(dir);
-        }
-
-        public INotifyTaskCompletion InitTask { get; }
 
         private void SetWorkingFolder(string path)
         {
@@ -62,10 +59,6 @@ namespace FactorioModManager.UI.ViewModels
                 {
                     _factorio = InstallationRepository.Create(Path.Combine(path, "game"));
                     Installations = new ReactiveBindingList<InstallationSpec>(_factorio.ScanInstallationsDirectory());
-
-                    // Locking Command, or SemaphoreCommand?
-                    // CanExecuteChange also based on task status for these commands
-                    // ReentrantAsyncCommand?
                 }
                 catch (ArgumentException)
                 {

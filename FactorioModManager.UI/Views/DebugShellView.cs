@@ -1,8 +1,9 @@
-﻿using System.Reactive.Linq;
+﻿using System.Reactive.Disposables;
+using System.Reactive.Linq;
 using System.Windows.Forms;
+using FactorioModManager.UI.Extensions;
 using FactorioModManager.UI.ViewModels;
 using ReactiveUI;
-using Splat;
 
 namespace FactorioModManager.UI.Views
 {
@@ -15,18 +16,28 @@ namespace FactorioModManager.UI.Views
             
             AutoScaleMode = AutoScaleMode.Font;
             InitializeComponent();
+
+            this.WhenActivated(() =>
+            {
+                var disposer = new CompositeDisposable();
+
+                Observable.FromEventPattern(
+                    ev => InstallationsList.SelectedValueChanged += ev,
+                    ev => InstallationsList.SelectedValueChanged -= ev)
+                    .Select(x => InstallationsList.SelectedItem)
+                    .BindTo(ViewModel, x => x.SelectedInstallationSpec)
+                    .AddTo(disposer);
+
+                this.OneWayBind(ViewModel, x => x.Installations, x => x.InstallationsList.DataSource)
+                    .AddTo(disposer);
+
+                this.OneWayBind(ViewModel, viewModel => viewModel.Installation, view => view.InstallationView.ViewModel)
+                    .AddTo(disposer);
+
+                return disposer;
+            });
             
             ViewModel = new DebugViewModel();
-
-            Observable.FromEventPattern(
-                ev => InstallationsList.SelectedValueChanged += ev,
-                ev => InstallationsList.SelectedValueChanged -= ev)
-                .Select(x => InstallationsList.SelectedItem)
-                .BindTo(ViewModel, x => x.SelectedInstallationSpec);
-            
-            this.Bind(ViewModel, x => x.Installations, x => x.InstallationsList.DataSource);
-            
-            this.OneWayBind(ViewModel, viewModel => viewModel.Installation, view => view.InstallationView.ViewModel);
         }
 
         #region IViewFor<MyViewModel>

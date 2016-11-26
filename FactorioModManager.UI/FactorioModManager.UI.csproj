@@ -103,6 +103,7 @@
     <Compile Include="Dialogs\InstallationSpecBuilderForm.Designer.cs">
       <DependentUpon>InstallationSpecBuilderForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="Extensions\CompositeDisposableExtensions.cs" />
     <Compile Include="Extensions\ObservableCollectionEx.cs" />
     <Compile Include="Framework\AsyncCommand.cs" />
     <Compile Include="Framework\AsyncCommand`1.cs" />
