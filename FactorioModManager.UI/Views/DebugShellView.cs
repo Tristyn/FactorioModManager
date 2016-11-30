@@ -13,30 +13,20 @@ namespace FactorioModManager.UI.Views
         {
             if (Startup.IsInDesignMode)
                 return;
-            
+
             AutoScaleMode = AutoScaleMode.Font;
             InitializeComponent();
-
-            this.WhenActivated(() =>
-            {
-                var disposer = new CompositeDisposable();
-
-                Observable.FromEventPattern(
-                    ev => InstallationsList.SelectedValueChanged += ev,
-                    ev => InstallationsList.SelectedValueChanged -= ev)
-                    .Select(x => InstallationsList.SelectedItem)
-                    .BindTo(ViewModel, x => x.SelectedInstallationSpec)
-                    .AddTo(disposer);
-
-                this.OneWayBind(ViewModel, x => x.Installations, x => x.InstallationsList.DataSource)
-                    .AddTo(disposer);
-
-                this.OneWayBind(ViewModel, viewModel => viewModel.Installation, view => view.InstallationView.ViewModel)
-                    .AddTo(disposer);
-
-                return disposer;
-            });
             
+            Observable.FromEventPattern(
+                ev => InstallationsList.SelectedValueChanged += ev,
+                ev => InstallationsList.SelectedValueChanged -= ev)
+                .Select(x => InstallationsList.SelectedItem)
+                .BindTo(ViewModel, x => x.SelectedInstallationSpec);
+
+            this.OneWayBind(ViewModel, x => x.Installations, x => x.InstallationsList.DataSource);
+
+            this.OneWayBind(ViewModel, viewModel => viewModel.Installation, view => view.InstallationView.ViewModel);
+
             ViewModel = new DebugViewModel();
         }
 
