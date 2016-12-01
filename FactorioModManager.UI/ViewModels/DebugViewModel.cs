@@ -43,6 +43,8 @@ namespace FactorioModManager.UI.ViewModels
                 var dir = Path.Combine(Environment.CurrentDirectory, "working-folder");
                 SetWorkingFolder(dir);
             });
+
+            Installation = new InstallationViewModel(null);
         }
 
         public string Error
@@ -167,7 +169,7 @@ namespace FactorioModManager.UI.ViewModels
             using (await _lock.LockAsync())
                 model = await _factorio.GetStandaloneInstallation(spec);
 
-            Installation = new InstallationViewModel(model);
+            Installation.Model = model;
         }
 
         #endregion

@@ -20,26 +20,35 @@ namespace FactorioModManager.UI.ViewModels
         private Installation _model;
 
         private readonly ObservableAsPropertyHelper<string> _status;
+        private readonly ObservableAsPropertyHelper<InstallationSpec> _spec;
         private string _installFileArchiveFilePath;
 
         /// <exception cref="ArgumentNullException"><paramref name="model"/> is <see langword="null" />.</exception>
         public InstallationViewModel(Installation model)
         {
-            if (model == null)
-                throw new ArgumentNullException("model");
-
             Model = model;
-
+            
             this.WhenAnyObservable(viewModel => viewModel.Model.Status)
                 .Select(status => status.ToString())
+                .ObserveOn(RxApp.MainThreadScheduler)
                 .ToProperty(this, viewModel => viewModel.Status, out _status);
 
-            RefreshStatus = ReactiveCommand.CreateAsyncTask(
+            this.WhenAnyValue(viewModel => viewModel.Model.Spec)
+                .ToProperty(this, viewModel => viewModel.Spec, out _spec);
+            
+            Play = ReactiveCommand.CreateAsyncTask(
                 this.WhenAnyObservable(viewModel => viewModel.Model.Status)
-                    .Select(status => status == InstallationStatus.Ready),
-                o =>  Model.LaunchGame());
+                    .Select(status => status == InstallationStatus.Ready)
+                    .ObserveOn(RxApp.MainThreadScheduler),
+                o => Model?.LaunchGame() ?? Task.CompletedTask);
+            
+            RefreshStatus = ReactiveCommand.CreateAsyncTask(
+                this.WhenAny(viewModel => viewModel.Model, m => m != null),
+                o => Model?.RefreshStatus() ?? Task.CompletedTask);
 
-            RefreshStatus = ReactiveCommand.CreateAsyncTask(o => Model.RefreshStatus());
+            // Auto refresh status on model change
+            this.WhenAnyValue(viewModel => viewModel.Model)
+                .InvokeCommand(RefreshStatus);
 
             InstallFileArchive = ReactiveCommand.CreateAsyncTask(o => InstallArchiveImpl());
         }
@@ -97,7 +106,7 @@ namespace FactorioModManager.UI.ViewModels
             }
         }
 
-        private Installation Model
+        public Installation Model
         {
             get { return _model; }
             set { this.RaiseAndSetIfChanged(ref _model, value); }
@@ -105,7 +114,7 @@ namespace FactorioModManager.UI.ViewModels
 
         public string Status => string.Format("Status: {0}", _status.Value);
 
-        public InstallationSpec Spec => _model.Spec;
+        public InstallationSpec Spec => _spec.Value;
 
         public IReactiveCommand RefreshStatus { get; }
 
