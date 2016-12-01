@@ -3,6 +3,7 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Reactive.Subjects;
+using System.Runtime.InteropServices.ComTypes;
 using System.Threading.Tasks;
 using FactorioModManager.Lib.Archive;
 using FactorioModManager.Lib.Files;
@@ -127,6 +128,8 @@ namespace FactorioModManager.Lib
 
         public async Task<bool> LaunchGame()
         {
+            InstallationStatus nextStatus;
+
             using (await _lock.LockAsync())
             {
                 var status = RefreshStatusInternal();
@@ -137,15 +140,30 @@ namespace FactorioModManager.Lib
                 try
                 {
                     _gameProcess = Process.Start(gameBinary);
-                    _status.OnNext(InstallationStatus.Running);
+                    _gameProcess.EnableRaisingEvents = true;
+                    // After the game closes, update its status automatically
+                    _gameProcess.Exited += (sender, args) =>
+                    {
+                        // Eek! Don't observe any exceptions.
+                        // Errors should be logged somewhere in the future
+                        RefreshStatus(); 
+                    };
+                    nextStatus = InstallationStatus.Running;
                 }
                 catch (Win32Exception ex)
                 {
                     // Binary not found or invalid format
-                    _status.OnNext(InstallationStatus.NotReady);
-                    return false;
+                    nextStatus = InstallationStatus.NotReady;
                 }
-                return true;
+            }
+
+            _status.OnNext(nextStatus);
+            switch (nextStatus)
+            {
+                case InstallationStatus.Running:
+                    return true;
+                default:
+                    return false;
             }
         }
 
