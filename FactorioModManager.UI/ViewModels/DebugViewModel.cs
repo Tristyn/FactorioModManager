@@ -1,14 +1,15 @@
 ﻿using System;
 using System.IO;
+using System.Reactive.Disposables;
 using System.Security;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Windows.Input;
 using FactorioModManager.Lib;
 using FactorioModManager.Lib.Models;
-using FactorioModManager.UI.Dialogs;
 using FactorioModManager.UI.Extensions;
 using FactorioModManager.UI.Framework;
+using FactorioModManager.UI.Views;
 using Nito.AsyncEx;
 using ReactiveUI;
 using ReactiveUI.Winforms;
@@ -17,7 +18,6 @@ namespace FactorioModManager.UI.ViewModels
 {
     public class DebugViewModel : ViewModelBase
     {
-        private bool _initialized;
         private InstallationRepository _factorio;
         private readonly AsyncLock _lock = new AsyncLock();
         private string _error;
@@ -29,21 +29,25 @@ namespace FactorioModManager.UI.ViewModels
         {
             ChangeWorkingFolder = new Command(ChangeWorkingFolderHandler);
             NewInstallCommand = new AsyncCommand(async token => await NewInstallHandler());
-
-            this.WhenActivated(disposable =>
+            
+            this.WhenActivated(() =>
             {
+                var disposer = new CompositeDisposable();
+
                 var loadInstallation = ReactiveCommand.CreateAsyncTask(
                         o => LoadInstallation(SelectedInstallationSpec))
-                    .AddTo(disposable);
+                    .AddTo(disposer);
 
                 this.WhenAnyValue(model => model.SelectedInstallationSpec)
                     .InvokeCommand(loadInstallation)
-                    .AddTo(disposable);
+                    .AddTo(disposer);
 
                 var dir = Path.Combine(Environment.CurrentDirectory, "working-folder");
                 SetWorkingFolder(dir);
-            });
 
+                return disposer;
+            });
+            
             Installation = new InstallationViewModel(null);
         }
 
@@ -60,7 +64,7 @@ namespace FactorioModManager.UI.ViewModels
                 try
                 {
                     _factorio = InstallationRepository.Create(Path.Combine(path, "game"));
-                    Installations = new ReactiveBindingList<InstallationSpec>(_factorio.ScanInstallationsDirectory());
+                    Installations = new ReactiveBindingList<InstallationSpec>(_factorio.EnumerateInstallations());
                 }
                 catch (ArgumentException)
                 {
@@ -121,7 +125,7 @@ namespace FactorioModManager.UI.ViewModels
                 {
                     await Task.Run(() => _factorio.GetStandaloneInstallation(specDialog.SpecResult));
                     Installations.Clear();
-                    Installations.AddRange(_factorio.ScanInstallationsDirectory());
+                    Installations.AddRange(_factorio.EnumerateInstallations());
                 }
                 catch (UnauthorizedAccessException)
                 {

@@ -12,7 +12,7 @@ using Splat;
 
 namespace FactorioModManager.UI.Views
 {
-    public partial class InstallationView : UserControl, IViewFor<InstallationViewModel>, INotifyPropertyChanged
+    public partial class InstallationView : UserControl, IViewFor<InstallationViewModel>
     {
         private InstallationViewModel _viewModel;
 
@@ -49,6 +49,9 @@ namespace FactorioModManager.UI.Views
                     viewModel => viewModel.Play,
                     view => view.PlayBtn)
                     .AddTo(disposer);
+
+                // hacky event handler to show off the sign form
+                InstallWebBtn.Click += (sender, args) => { new SignInView(new SignInViewModel(new AnonymousFactorioWebClient())).ShowDialog(this); };
 
                 Observable.FromEventPattern(
                     ev => InstallArchiveBtn.Click += ev,
@@ -110,7 +113,5 @@ namespace FactorioModManager.UI.Views
                 _viewModel = value;
             }
         }
-
-        public event PropertyChangedEventHandler PropertyChanged;
     }
 }

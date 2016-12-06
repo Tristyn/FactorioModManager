@@ -72,7 +72,7 @@ namespace FactorioModManager.Lib
         /// <exception cref="SecurityException">The caller does not have the required permission. </exception>
         /// <exception cref="UnauthorizedAccessException">The caller does not have the required permission.</exception>
         /// <exception cref="PathTooLongException">The specified path, file name, or combined exceed the system-defined maximum length. For example, on Windows-based platforms, paths must be less than 248 characters and file names must be less than 260 characters.</exception>
-        public IEnumerable<InstallationSpec> ScanInstallationsDirectory()
+        public IEnumerable<InstallationSpec> EnumerateInstallations()
         {
             var installs = new List<InstallationSpec>();
             foreach (var dir in Directory.EnumerateDirectories(_installationsDirectory))

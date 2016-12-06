@@ -1,6 +1,6 @@
-﻿namespace FactorioModManager.UI.Dialogs
+﻿namespace FactorioModManager.UI.Views
 {
-    partial class InstallationSpecBuilderForm
+    partial class InstallationSpecBuilderView
     {
         /// <summary>
         /// Required designer variable.
@@ -145,7 +145,7 @@
             this.label5.TabIndex = 11;
             this.label5.Text = ".";
             // 
-            // InstallationSpecBuilderForm
+            // InstallationSpecBuilderView
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
@@ -165,7 +165,7 @@
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
             this.MaximizeBox = false;
             this.MinimizeBox = false;
-            this.Name = "InstallationSpecBuilderForm";
+            this.Name = "InstallationSpecBuilderView";
             this.ShowIcon = false;
             this.ShowInTaskbar = false;
             this.Text = "Add New Installation";

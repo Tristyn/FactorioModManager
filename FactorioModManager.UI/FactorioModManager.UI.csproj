@@ -96,12 +96,22 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ConsoleLogger.cs" />
-    <Compile Include="Dialogs\InstallationSpecBuilderDialog.cs" />
-    <Compile Include="Dialogs\InstallationSpecBuilderForm.cs">
+    <Compile Include="Controls\CueTextBox.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Views\InstallationSpecBuilderDialog.cs" />
+    <Compile Include="Views\InstallationSpecBuilderView.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="Dialogs\InstallationSpecBuilderForm.Designer.cs">
-      <DependentUpon>InstallationSpecBuilderForm.cs</DependentUpon>
+    <Compile Include="Views\InstallationSpecBuilderView.Designer.cs">
+      <DependentUpon>InstallationSpecBuilderView.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\SignInDialog.cs" />
+    <Compile Include="Views\SignInView.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Views\SignInView.Designer.cs">
+      <DependentUpon>SignInView.cs</DependentUpon>
     </Compile>
     <Compile Include="Extensions\CompositeDisposableExtensions.cs" />
     <Compile Include="Extensions\ObservableCollectionEx.cs" />
@@ -114,6 +124,7 @@
     <Compile Include="Startup.cs" />
     <Compile Include="ViewModels\DebugViewModel.cs" />
     <Compile Include="ViewModels\InstallationViewModel.cs" />
+    <Compile Include="ViewModels\SignInViewModel.cs" />
     <Compile Include="Views\DebugShellView.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -126,10 +137,13 @@
     <Compile Include="Views\InstallationView.Designer.cs">
       <DependentUpon>InstallationView.cs</DependentUpon>
     </Compile>
-    <EmbeddedResource Include="Dialogs\InstallationSpecBuilderForm.resx">
-      <DependentUpon>InstallationSpecBuilderForm.cs</DependentUpon>
+    <EmbeddedResource Include="Views\InstallationSpecBuilderView.resx">
+      <DependentUpon>InstallationSpecBuilderView.cs</DependentUpon>
     </EmbeddedResource>
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <EmbeddedResource Include="Views\SignInView.resx">
+      <DependentUpon>SignInView.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Views\InstallationView.resx">
       <DependentUpon>InstallationView.cs</DependentUpon>
     </EmbeddedResource>

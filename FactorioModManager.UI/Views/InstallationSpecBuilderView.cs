@@ -2,13 +2,13 @@
 using System.Windows.Forms;
 using FactorioModManager.Lib.Models;
 
-namespace FactorioModManager.UI.Dialogs
+namespace FactorioModManager.UI.Views
 {
-    public partial class InstallationSpecBuilderForm : Form
+    public partial class InstallationSpecBuilderView : Form
     {
         public InstallationSpec Result { get; private set; }
 
-        public InstallationSpecBuilderForm()
+        public InstallationSpecBuilderView()
         {
             InitializeComponent();
             ValidateInternal();

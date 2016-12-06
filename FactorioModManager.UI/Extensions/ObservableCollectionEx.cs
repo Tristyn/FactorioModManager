@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using FactorioModManager.UI.Dialogs;
 
 namespace FactorioModManager.UI.Extensions
 {

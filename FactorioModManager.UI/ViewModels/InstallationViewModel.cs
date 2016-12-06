@@ -1,7 +1,6 @@
 ﻿using System;
 using System.IO;
-using System.Reactive;
-using System.Reactive.Concurrency;
+using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Security;
 using System.Threading.Tasks;
@@ -10,6 +9,7 @@ using FactorioModManager.Lib;
 using FactorioModManager.Lib.Archive;
 using FactorioModManager.Lib.Models;
 using FactorioModManager.Lib.Web;
+using FactorioModManager.UI.Extensions;
 using FactorioModManager.UI.Framework;
 using ReactiveUI;
 
@@ -19,38 +19,48 @@ namespace FactorioModManager.UI.ViewModels
     {
         private Installation _model;
 
-        private readonly ObservableAsPropertyHelper<string> _status;
-        private readonly ObservableAsPropertyHelper<InstallationSpec> _spec;
+        private ObservableAsPropertyHelper<string> _status;
+        private ObservableAsPropertyHelper<InstallationSpec> _spec;
         private string _installFileArchiveFilePath;
 
-        /// <exception cref="ArgumentNullException"><paramref name="model"/> is <see langword="null" />.</exception>
         public InstallationViewModel(Installation model)
         {
             Model = model;
-            
-            this.WhenAnyObservable(viewModel => viewModel.Model.Status)
-                .Select(status => status.ToString())
-                .ObserveOn(RxApp.MainThreadScheduler)
-                .ToProperty(this, viewModel => viewModel.Status, out _status);
 
-            this.WhenAnyValue(viewModel => viewModel.Model.Spec)
-                .ToProperty(this, viewModel => viewModel.Spec, out _spec);
-            
-            Play = ReactiveCommand.CreateAsyncTask(
+            this.WhenActivated(() =>
+            {
+                var disposer = new CompositeDisposable();
+
                 this.WhenAnyObservable(viewModel => viewModel.Model.Status)
-                    .Select(status => status == InstallationStatus.Ready)
-                    .ObserveOn(RxApp.MainThreadScheduler),
-                o => Model?.LaunchGame() ?? Task.CompletedTask);
-            
-            RefreshStatus = ReactiveCommand.CreateAsyncTask(
-                this.WhenAny(viewModel => viewModel.Model, m => m != null),
-                o => Model?.RefreshStatus() ?? Task.CompletedTask);
+                    .Select(status => status.ToString())
+                    .ObserveOn(RxApp.MainThreadScheduler)
+                    .ToProperty(this, viewModel => viewModel.Status, out _status)
+                    .AddTo(disposer);
 
-            // Auto refresh status on model change
-            this.WhenAnyValue(viewModel => viewModel.Model)
-                .InvokeCommand(RefreshStatus);
+                this.WhenAnyValue(viewModel => viewModel.Model.Spec)
+                    .ToProperty(this, viewModel => viewModel.Spec, out _spec)
+                    .AddTo(disposer);
 
-            InstallFileArchive = ReactiveCommand.CreateAsyncTask(o => InstallArchiveImpl());
+                Play = ReactiveCommand.CreateAsyncTask(
+                    this.WhenAnyObservable(viewModel => viewModel.Model.Status)
+                        .Select(status => status == InstallationStatus.Ready)
+                        .ObserveOn(RxApp.MainThreadScheduler),
+                    o => Model?.LaunchGame() ?? Task.CompletedTask)
+                    .AddTo(disposer);
+
+                RefreshStatus = ReactiveCommand.CreateAsyncTask(
+                    this.WhenAny(viewModel => viewModel.Model, m => m != null),
+                    o => Model?.RefreshStatus() ?? Task.CompletedTask);
+
+                // Auto refresh status on model change
+                this.WhenAnyValue(viewModel => viewModel.Model)
+                    .InvokeCommand(RefreshStatus);
+
+                InstallFileArchive = ReactiveCommand.CreateAsyncTask(o => InstallArchiveImpl());
+
+                return disposer;
+            });
+
         }
 
         public Task<Stream> OpenArchiveFileImpl()
@@ -116,9 +126,9 @@ namespace FactorioModManager.UI.ViewModels
 
         public InstallationSpec Spec => _spec.Value;
 
-        public IReactiveCommand RefreshStatus { get; }
+        public IReactiveCommand RefreshStatus { get; private set; }
 
-        public IReactiveCommand Play { get; }
+        public IReactiveCommand Play { get; private set; }
 
         public string InstallFileArchiveFilePath
         {
@@ -126,6 +136,6 @@ namespace FactorioModManager.UI.ViewModels
             set { this.RaiseAndSetIfChanged(ref _installFileArchiveFilePath, value); }
         }
 
-        public IReactiveCommand InstallFileArchive { get; }
+        public IReactiveCommand InstallFileArchive { get; private set; }
     }
 }
