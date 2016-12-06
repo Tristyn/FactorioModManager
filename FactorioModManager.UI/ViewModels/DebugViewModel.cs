@@ -8,7 +8,6 @@ using System.Windows.Input;
 using FactorioModManager.Lib;
 using FactorioModManager.Lib.Models;
 using FactorioModManager.UI.Extensions;
-using FactorioModManager.UI.Framework;
 using FactorioModManager.UI.Views;
 using Nito.AsyncEx;
 using ReactiveUI;
@@ -27,9 +26,6 @@ namespace FactorioModManager.UI.ViewModels
 
         public DebugViewModel()
         {
-            ChangeWorkingFolder = new Command(ChangeWorkingFolderHandler);
-            NewInstallCommand = new AsyncCommand(async token => await NewInstallHandler());
-            
             this.WhenActivated(() =>
             {
                 var disposer = new CompositeDisposable();

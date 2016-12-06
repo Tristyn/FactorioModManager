@@ -10,7 +10,6 @@ using FactorioModManager.Lib.Archive;
 using FactorioModManager.Lib.Models;
 using FactorioModManager.Lib.Web;
 using FactorioModManager.UI.Extensions;
-using FactorioModManager.UI.Framework;
 using ReactiveUI;
 
 namespace FactorioModManager.UI.ViewModels

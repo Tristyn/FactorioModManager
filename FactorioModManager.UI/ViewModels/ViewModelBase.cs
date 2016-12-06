@@ -1,6 +1,6 @@
 ﻿using ReactiveUI;
 
-namespace FactorioModManager.UI.Framework
+namespace FactorioModManager.UI.ViewModels
 {
     public abstract class ViewModelBase : ReactiveObject, ISupportsActivation
     {

@@ -4,7 +4,6 @@ using System.Reactive.Linq;
 using System.Threading.Tasks;
 using FactorioModManager.Lib.Web;
 using FactorioModManager.UI.Extensions;
-using FactorioModManager.UI.Framework;
 using ReactiveUI;
 
 namespace FactorioModManager.UI.ViewModels
